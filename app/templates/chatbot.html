@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MediAI Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      #chat-box::-webkit-scrollbar {
+        width: 8px;
+      }
+      #chat-box::-webkit-scrollbar-thumb {
+        background-color: rgba(100, 116, 139, 0.4);
+        border-radius: 10px;
+      }
+      #chat-box::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+      .fade-in {
+        animation: fadeIn 0.4s ease forwards;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-br from-blue-100 to-white min-h-screen flex items-center justify-center px-4"
+  >
+    <div
+      class="w-full max-w-2xl mx-auto mt-10 p-6 bg-white rounded-3xl shadow-2xl flex flex-col"
+    >
+      <!-- Chat Header -->
+      <header class="flex items-center gap-4 mb-6 border-b pb-4">
+        <img
+          src="https://i.imgur.com/7k12EPD.png"
+          alt="MediAI Bot"
+          class="w-12 h-12 rounded-full border-2 border-blue-500"
+        />
+        <h2 class="text-3xl font-bold text-blue-700 select-none">
+          MediAI Assistant
+        </h2>
+      </header>
+
+      <!-- Action Options -->
+      <div id="action-options" class="mb-6 flex justify-center gap-6">
+        <button
+          onclick="handleOptionClick('I want to book an appointment')"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full shadow-lg transition duration-200 ease-in-out"
+        >
+          Book Appointment
+        </button>
+        <button
+          onclick="handleOptionClick('Recommend product')"
+          class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full shadow-lg transition duration-200 ease-in-out"
+        >
+          Product Recommendation
+        </button>
+      </div>
+
+      <!-- Chat Box -->
+      <main
+        id="chat-box"
+        class="h-96 overflow-y-auto border border-gray-300 rounded-2xl p-6 bg-gray-50 space-y-5 shadow-inner scroll-smooth"
+      >
+        <!-- Messages appear here -->
+      </main>
+
+      <!-- Chat Input -->
+      <form id="chat-form" class="mt-6 flex" autocomplete="off">
+        <input
+          type="text"
+          id="chat-input"
+          name="message"
+          class="flex-1 p-4 border border-gray-300 rounded-l-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-lg"
+          placeholder="Type your message here..."
+          required
+        />
+        <button
+          type="submit"
+          class="bg-blue-600 text-white px-8 rounded-r-2xl hover:bg-blue-700 transition duration-200 text-lg font-semibold"
+        >
+          Send
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <footer class="mt-6 text-center text-gray-400 text-sm select-none">
+        Powered by MediAI &mdash; Your AI health assistant
+      </footer>
+    </div>
+
+    <!-- Calendar Modal -->
+    <div
+      id="calendar-modal"
+      class="hidden fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center"
+    >
+      <div class="bg-white p-6 rounded-xl shadow-lg w-80">
+        <h3 class="text-xl font-semibold mb-4">Choose Appointment Date</h3>
+        <input
+          type="date"
+          id="appointment-date"
+          class="w-full p-2 border rounded mb-4"
+        />
+        <button
+          onclick="submitAppointmentDate()"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Confirm
+        </button>
+        <button
+          onclick="closeCalendar()"
+          class="ml-2 text-sm text-gray-500 hover:underline"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      const form = document.getElementById("chat-form");
+      const input = document.getElementById("chat-input");
+      const chatBox = document.getElementById("chat-box");
+      const actionOptions = document.getElementById("action-options");
+      let chatContext = {};
+
+      function createMessageElement(message, from = "user") {
+        const container = document.createElement("div");
+        container.classList.add(
+          "flex",
+          from === "user" ? "justify-end" : "justify-start",
+          "fade-in"
+        );
+
+        const wrapper = document.createElement("div");
+        wrapper.classList.add(
+          "max-w-[75%]",
+          "flex",
+          from === "user" ? "flex-row-reverse" : "flex-row",
+          "items-end",
+          "gap-3"
+        );
+
+        const avatar = document.createElement("img");
+        avatar.src =
+          from === "user"
+            ? "https://i.imgur.com/7c3E1D6.png"
+            : "https://i.imgur.com/7k12EPD.png";
+        avatar.alt = from === "user" ? "You" : "MediAI";
+        avatar.classList.add("w-8", "h-8", "rounded-full", "shadow");
+
+        const bubble = document.createElement("span");
+        bubble.classList.add(
+          "inline-block",
+          "px-5",
+          "py-3",
+          "rounded-2xl",
+          "shadow",
+          "whitespace-pre-wrap",
+          "break-words"
+        );
+
+        if (from === "user") {
+          bubble.classList.add("bg-blue-600", "text-white");
+        } else {
+          bubble.classList.add("bg-gray-200", "text-gray-800");
+        }
+
+        bubble.innerHTML = message;
+
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(bubble);
+        container.appendChild(wrapper);
+
+        return container;
+      }
+
+      function createProductCard(product) {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add(
+          "bg-white",
+          "rounded-xl",
+          "shadow-md",
+          "overflow-hidden",
+          "w-60",
+          "border",
+          "border-gray-200"
+        );
+
+        const img = document.createElement("img");
+        img.src =
+          product.image_url ||
+          "https://via.placeholder.com/240x160.png?text=No+Image";
+        img.alt = product.name || "Product Image";
+        img.classList.add("w-full", "h-40", "object-cover");
+
+        const info = document.createElement("div");
+        info.classList.add("p-4");
+
+        const name = document.createElement("h3");
+        name.textContent = product.name || "Product Name";
+        name.classList.add("font-semibold", "text-gray-800", "text-lg", "mb-2");
+
+        const price = document.createElement("p");
+        price.textContent = `₹${product.price || "---"}`;
+        price.classList.add("text-blue-600", "font-bold");
+
+        const button = document.createElement("a");
+        button.href = `/add-to-cart/${product.product_id}/`;
+        button.textContent = "Buy Now";
+        button.classList.add(
+          "mt-2",
+          "inline-block",
+          "bg-blue-500",
+          "text-white",
+          "px-4",
+          "py-2",
+          "rounded-full",
+          "hover:bg-blue-600",
+          "text-center",
+          "text-sm",
+          "font-semibold"
+        );
+
+        info.appendChild(name);
+        info.appendChild(price);
+        info.appendChild(button);
+        wrapper.appendChild(img);
+        wrapper.appendChild(info);
+        return wrapper;
+      }
+
+      function displayProductRecommendations(products) {
+        const cardContainer = document.createElement("div");
+        cardContainer.classList.add(
+          "flex",
+          "flex-wrap",
+          "gap-4",
+          "fade-in",
+          "mt-4"
+        );
+
+        products.forEach((p) => {
+          cardContainer.appendChild(createProductCard(p));
+        });
+
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("flex", "justify-start");
+        wrapper.appendChild(cardContainer);
+
+        chatBox.appendChild(wrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      function openCalendar() {
+        document.getElementById("calendar-modal").classList.remove("hidden");
+      }
+
+      function closeCalendar() {
+        document.getElementById("calendar-modal").classList.add("hidden");
+      }
+
+      function submitAppointmentDate() {
+        const date = document.getElementById("appointment-date").value;
+        if (date) {
+          closeCalendar();
+          input.value = `I want to book an appointment on ${date}`;
+          form.dispatchEvent(new Event("submit"));
+        }
+      }
+
+      function handleOptionClick(option) {
+        if (option.toLowerCase().includes("appointment")) {
+          openCalendar();
+        } else {
+          input.value = option;
+          form.dispatchEvent(new Event("submit"));
+          actionOptions.style.display = "none";
+          input.focus();
+        }
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const message = input.value.trim();
+        if (!message) return;
+
+        chatBox.appendChild(createMessageElement(message, "user"));
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        input.disabled = true;
+        form.querySelector('button[type="submit"]').disabled = true;
+        input.value = "";
+
+        try {
+          const response = await fetch("/chat-api/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: JSON.stringify({ message, context: chatContext }),
+          });
+
+          const data = await response.json();
+
+          if (data.response) {
+            chatBox.appendChild(
+              createMessageElement(data.response.replace(/\n/g, "<br>"), "bot")
+            );
+          }
+
+          if (Array.isArray(data.products) && data.products.length > 0) {
+            displayProductRecommendations(data.products);
+          }
+
+          chatContext = data.context || {};
+        } catch (err) {
+          chatBox.appendChild(
+            createMessageElement(
+              "Sorry, something went wrong. Please try again.",
+              "bot"
+            )
+          );
+        } finally {
+          input.disabled = false;
+          form.querySelector('button[type="submit"]').disabled = false;
+          input.focus();
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+      });
+    </script>
+  </body>
+</html>

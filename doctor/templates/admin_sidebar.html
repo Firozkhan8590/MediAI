@@ -1,0 +1,88 @@
+<aside class="sidebar fixed h-full bg-white shadow-lg z-10">
+  <div class="flex flex-col h-full">
+    <!-- Admin Profile -->
+    <div class="px-6 py-4 border-b border-gray-100">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center"
+        >
+          <i class="ri-user-3-line text-primary ri-lg"></i>
+        </div>
+        <div>
+          <h3
+            class="font-medium text-gray-800"
+            style="font-family: 'Roboto', sans-serif"
+          >
+            Welcome, {{ current_user.username }}
+          </h3>
+          <p class="text-xs text-gray-500">Administrator</p>
+        </div>
+      </div>
+    </div>
+    <!-- Navigation -->
+    <nav class="flex-1 py-4 overflow-y-auto">
+      <div class="px-4 mb-3">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">
+          Main
+        </p>
+      </div>
+
+      <!-- Dashboard -->
+      <a
+        href="{% url 'admin_dashboard' %}"
+        class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'admin_dashboard' %} bg-primary/5 text-primary {% else %} text-gray-500 hover:bg-primary/5 hover:text-primary {% endif %} transition-colors"
+      >
+        <div class="w-5 h-5 flex items-center justify-center mr-3">
+          <i class="ri-dashboard-line"></i>
+        </div>
+        <span>Dashboard</span>
+      </a>
+
+      <!-- Manage Users -->
+      <a
+        href="{% url 'admin_user_manage' %}"
+        class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'admin_user_manage' %} bg-primary/5 text-primary {% else %} text-gray-500 hover:bg-primary/5 hover:text-primary {% endif %} transition-colors"
+      >
+        <div class="w-5 h-5 flex items-center justify-center mr-3">
+          <i class="ri-user-line"></i>
+        </div>
+        <span>Manage Users</span>
+      </a>
+
+      <!-- Manage Doctors -->
+      <a
+        href="{% url 'admin_doctor_manage' %}"
+        class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'admin_doctor_manage' %} bg-primary/5 text-primary {% else %} text-gray-500 hover:bg-primary/5 hover:text-primary {% endif %} transition-colors"
+      >
+        <div class="w-5 h-5 flex items-center justify-center mr-3">
+          <i class="ri-health-book-line"></i>
+        </div>
+        <span>Manage Doctors</span>
+      </a>
+
+      <!-- Manage Products -->
+      <a
+        href="#"
+        class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'admin_product_manage' %} bg-primary/5 text-primary {% else %} text-gray-500 hover:bg-primary/5 hover:text-primary {% endif %} transition-colors"
+      >
+        <div class="w-5 h-5 flex items-center justify-center mr-3">
+          <i class="ri-shopping-bag-3-line"></i>
+        </div>
+        <span>Manage Products</span>
+      </a>
+    </nav>
+
+    <!-- Logout -->
+    <div class="px-6 py-4 border-t border-gray-100">
+      <a
+        href="{% url 'admin_logout' %}"
+        class="flex items-center text-gray-500 hover:text-red-500 transition-colors"
+      >
+        <div class="w-5 h-5 flex items-center justify-center mr-3">
+          <i class="ri-logout-box-r-line"></i>
+        </div>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+</aside>
