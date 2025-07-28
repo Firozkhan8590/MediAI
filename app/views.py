@@ -40,6 +40,10 @@ def user_registration(request):
         if CustomUser.objects.filter(email=email).exists():
             messages.error(request, "Email is already in use.")
             return redirect('register')
+        
+        if CustomUser.objects.filter(username=username).exists():
+            messages.error(request, "Username is already in use.")
+            return redirect('register')
 
         CustomUser.objects.create_user(
             username=username,
@@ -84,6 +88,25 @@ def user_login(request):
 
 
 
+def edit_profile_user(request, user_id):
+    user_to_edit = get_object_or_404(CustomUser, id=user_id)
+
+    if request.method == 'POST':
+        user_to_edit.username = request.POST.get('username', user_to_edit.username)
+        user_to_edit.email = request.POST.get('email', user_to_edit.email)
+        user_to_edit.age = request.POST.get('age', user_to_edit.age)
+        user_to_edit.phone_number = request.POST.get('phone_number', user_to_edit.phone_number)
+        user_to_edit.address = request.POST.get('address', user_to_edit.address)
+        user_to_edit.pincode = request.POST.get('pincode', user_to_edit.pincode)
+        user_to_edit.state = request.POST.get('state', user_to_edit.state)
+        user_to_edit.country = request.POST.get('country', user_to_edit.country)
+
+        user_to_edit.save()
+        messages.success(request, "Profile updated successfully!")
+        return redirect('profile', user_id=user_to_edit.id)
+
+    return render(request, 'edit_profile_user.html', {'user': user_to_edit})
+
 # Users product management
 
 from doctor.models import Product
@@ -92,11 +115,6 @@ def user_landing(request):
     products = Product.objects.all().order_by('-created_at')
     return render(request, 'user_landing.html', {'products': products})
 
-
-
-
-
-    
 
 
 def landing_page(request):
@@ -234,8 +252,9 @@ def cart_detail(request):
 
 def cart_add(request, product_id):
     product = get_object_or_404(Product, id=product_id)
+    quantity = int(request.POST.get('quantity', 1))
     cart = Cart(request)
-    cart.add(product)
+    cart.add(product,quantity=quantity)
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({'message': 'Product added', 'count': cart.count()})
@@ -297,7 +316,6 @@ def create_razorpay_order(request):
 
 
 @csrf_exempt
-@require_POST
 def payment_success(request):
     data = json.loads(request.body)
     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -322,10 +340,12 @@ def payment_success_redirect(request):
         cart = Cart(request)
         user = request.user
 
+        address = user.address if user.address else "No address provided"
+
         order = Order.objects.create(
             user=user,
             order_number=f"ORD-{int(timezone.now().timestamp())}",
-            address=user.address,
+            address=address,
             status='Placed',
             razorpay_order_id=request.session.get('razorpay_order_id', ''),
             razorpay_payment_id=request.session.get('razorpay_payment_id', '')
@@ -338,6 +358,15 @@ def payment_success_redirect(request):
                 quantity=item['quantity'],
                 price=item['price']
             )
+
+            # 2. Reduce Product quantity
+            product = Product.objects.get(id=item['id'])
+            if product.quantity >= item['quantity']:
+                product.quantity -= item['quantity']
+                product.save()
+            
+            else:
+                pass
 
         cart.clear()
         messages.success(request, "Payment successful and order placed!")
@@ -410,8 +439,6 @@ def product_search(request):
 
 
 
-
-
 #Chatbot
 
 import openai
@@ -419,48 +446,38 @@ from django.conf import settings
 
 openai.api_key = settings.OPENAI_API_KEY
 
-def generate_bot_response(message):
-    prompt = f"""
-You are a helpful medical AI assistant.
-
-The user describes symptoms, and you:
-1. Suggest a relevant doctor specialty
-2. Recommend any over-the-counter products or helpful items (like skincare, supplements, etc.)
-3. Keep answers short, friendly, and clear.
-
-Example:
-User: I have a sore throat and fever.
-AI: You may need to consult a General Physician. You might try lozenges and paracetamol. Would you like to see doctors or products?
-
-Now answer this:
-User: {message}
-AI:"""
-
+def generate_llm_response(message):
     response = openai.ChatCompletion.create(
-        model="gpt-4",  # or "gpt-3.5-turbo" if you're on the free tier
+        model="gpt-4",
         messages=[
-            {"role": "system", "content": "You are a helpful medical assistant."},
-            {"role": "user", "content": prompt},
+            {"role": "system", "content": "You are a helpful medical AI assistant. The user describes symptoms, and you suggest a doctor specialty, and recommend useful products briefly."},
+            {"role": "user", "content": message},
         ],
         max_tokens=150,
         temperature=0.7,
     )
-
     return response.choices[0].message['content'].strip()
 
 
-from django.views.decorators.csrf import csrf_exempt
-import json
 
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 @csrf_exempt
 def chat_api(request):
-    if request.method == "POST":
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+
+    try:
         data = json.loads(request.body)
         user_message = data.get("message")
         context = data.get("context", {})
-        user = request.user if request.user.is_authenticated else None
 
+        if not user_message:
+            return JsonResponse({"error": "Message is required."}, status=400)
+
+        user = request.user if request.user.is_authenticated else None
         response_text, updated_context = generate_bot_response(user_message, user=user, context=context)
 
         return JsonResponse({
@@ -468,6 +485,10 @@ def chat_api(request):
             "context": updated_context
         })
 
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 
@@ -478,11 +499,33 @@ from datetime import datetime
 from dateutil.parser import parse as parse_datetime
 from .models import CustomDoctor, Consultation, Product
 
+
+import re
+
 def generate_bot_response(message, user=None, context=None):
     if context is None:
         context = {}
 
     message_lower = message.lower()
+
+    greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening","hii"]
+    if message_lower.strip() in greetings:
+        return (
+            "Hi there! 👋 I'm your medical assistant. Please tell me your symptoms or let me know if you'd like skincare suggestions or book an appointment.",
+            context
+        )
+
+    # Small talk or polite phrases
+    if message_lower in ["how are you", "what's up", "how's it going"]:
+        return (
+            "I'm great, thanks for asking! 😊 How can I help you today with your health concerns or skincare suggestions?",
+            context
+        )
+    if message_lower in ["thanks", "thank you", "welcome"]:
+        return (
+            "Thank you for choosing medi ai",
+            context
+        )
 
     # Step 1: If waiting for appointment date/time
     if context.get('booking_step') == 'ask_date_time':
@@ -490,10 +533,20 @@ def generate_bot_response(message, user=None, context=None):
         try:
             dt = datetime.strptime(message.strip(), "%Y-%m-%d %H:%M")
         except ValueError:
-            dt = parse_datetime(message.strip())
+            try:
+                dt = parse_datetime(message.strip())
+            except Exception:
+                dt = None
         if not dt:
             return (
                 "Please provide the appointment date and time in this format: YYYY-MM-DD HH:MM (24-hour time).",
+                context
+            )
+        
+        # ✅ Prevent booking in the past
+        if dt < datetime.now():
+            return (
+                "You cannot book an appointment in the past. Please provide a valid future date and time (YYYY-MM-DD HH:MM).",
                 context
             )
 
@@ -542,27 +595,37 @@ def generate_bot_response(message, user=None, context=None):
             )
 
     # --- New Step: Product recommendation based on skin type ---
-    if "recommend product" in message_lower or "skincare suggestion" in message_lower:
+    if "recommend a product" in message_lower or "skincare suggestion" in message_lower:
         context["awaiting_skin_type"] = True
         return ("Sure! Please tell me your skin type (e.g., oily skin, dry skin, etc.)", context)
+    
 
     if context.get('awaiting_skin_type'):
-        skin_types = ["dry skin", "oily skin", "sensitive skin", "combination skin", "normal skin"]
+        skin_types = ["dry skin", "oily skin", "sensitive skin", "combination skin", "normal skin","dry", "oily","sensitive","combination"]
         for skin_type in skin_types:
             if skin_type in message_lower:
+                from .utils import skincare_by_skin_type
+                
                 products = skincare_by_skin_type(skin_type)
+
+                context.clear()
+
+
+                print(f"Products for {skin_type}: {products}")
                 if products:
-                    product_list = "\n".join(
-                        [f"- {p['name']} (₹{p['price']}): {p.get('description', '')[:50]}..." for p in products]
+                    product_list = "\n\n".join(
+                        [
+                            f"{i+1}. {p['product_name']} (₹{p.get('price', 'N/A')}): {p.get('description', 'No description')[:50]}..."
+                            for i, p in enumerate(products)
+                        ]
                     )
-                    context.clear()
                     return (
                         f"For {skin_type}, here are some recommended products:\n{product_list}\n\n"
                         "Would you like to consult a dermatologist too?",
                         context
                     )
+                    
                 else:
-                    context.clear()
                     return (
                         f"Sorry, no products found for {skin_type}. Would you like to consult a dermatologist?",
                         context
@@ -572,6 +635,7 @@ def generate_bot_response(message, user=None, context=None):
             "Sorry, I didn't recognize that skin type. Please specify one of: dry skin, oily skin, sensitive skin, combination skin, or normal skin.",
             context
         )
+
 
     # Step 3: Match symptoms to specialization and doctors
     symptom_specialization_map = {
@@ -680,7 +744,8 @@ def generate_bot_response(message, user=None, context=None):
     }
 
     matched_specialization = None
-    for symptom, specialization in symptom_specialization_map.items():
+    sorted_symptoms = sorted(symptom_specialization_map.items(), key=lambda x: -len(x[0]))
+    for symptom, specialization in sorted_symptoms:
         if symptom in message_lower:
             matched_specialization = specialization
             break
@@ -714,12 +779,17 @@ def generate_bot_response(message, user=None, context=None):
                 "Please check again later or contact support.",
                 context
             )
+        
+    
 
     # If no match and not booking step or skin type awaiting
     return (
         "I'm not sure which specialization fits your symptoms. Could you describe them a bit more?",
         context
     )
+
+
+
 
 
 
@@ -733,13 +803,112 @@ from .utils import skincare_by_skin_type
 
 def recommend_products(request):
     recommendations = []
+    skin_type = request.GET.get('skin_type', '')
     
-    if request.method == "POST":
-        skin_type = request.POST.get('skin_type')
-        num_products = int(request.POST.get('num_products', 5))
-        
-        recommendations = skincare_by_skin_type(skin_type, num_products)
+    if skin_type:
+        recommendations = skincare_by_skin_type(skin_type, num_products=5)
 
-    return render(request, "recommendation/recommend.html", {"recommendations": recommendations})
+    return render(request, "skin_type_products.html", {
+        "recommendations": recommendations,
+        "skin_type": skin_type,
+    })
+
+
+import os
+import pandas as pd
+from django.conf import settings
+from django.shortcuts import render, Http404
+
+
+# def product_detail_csv(request, pk):
+#     file_path = os.path.join(settings.BASE_DIR, 'app', 'export_skincare.csv')
+#     try:
+#         df = pd.read_csv(file_path)
+
+#         # Find the product with the given pk (assuming 'id' column in CSV)
+#         product_row = df[df['id'] == pk]
+
+#         if product_row.empty:
+#             raise Http404("Product not found")
+
+#         product = product_row.iloc[0].to_dict()
+
+#         return render(request, "product_detail.html", {"product": product})
+
+#     except FileNotFoundError:
+#         raise Http404("Data file not found")
+
+
+from .models import ChatRoom, ChatMessage, Notification
+from django.shortcuts import render, get_object_or_404
+
+#chat 
+def chat_room(request, consultation_id):
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+    chat_room, created = ChatRoom.objects.get_or_create(consultation=consultation)
+    messages = ChatMessage.objects.filter(room=chat_room).order_by('timestamp')
+    
+    # Mark notifications as read
+    Notification.objects.filter(
+        consultation=consultation,
+        user=request.user,
+        is_read=False
+    ).update(is_read=True)
+    
+    return render(request, 'chatroom.html', {
+        'room': chat_room,
+        'messages': messages,
+        'consultation': consultation
+    })
+
+
+
+def send_message(request, room_id):
+    if request.method == 'POST':
+        room = get_object_or_404(ChatRoom, id=room_id)
+        message = request.POST.get('message', '').strip()
+        
+        if message:
+            if hasattr(request.user, 'customdoctor'):
+                # Doctor is sending
+                ChatMessage.objects.create(
+                    room=room,
+                    sender_doctor=request.user.customdoctor,
+                    message=message
+                )
+            else:
+                # Patient is sending
+                ChatMessage.objects.create(
+                    room=room,
+                    sender=request.user,
+                    message=message
+                )
+            
+            return JsonResponse({'status': 'ok'})
+    
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+def notification_list(request):
+    notifications = Notification.objects.all().order_by('-created_at')
+
+    return render(request, 'notifications.html', {'notifications': notifications})
+
+
+
+def appointment_list(request):
+    consultations = Consultation.objects.select_related('doctor').all().order_by('-booked_at')
+    return render(request, 'appointments_list.html', {'consultations': consultations})
+
+
+def cancel_appointment(request, pk):
+    consultation = get_object_or_404(Consultation, pk=pk)
+    consultation.status = 'cancelled'
+    consultation.save()
+    return redirect('appointment_list')
+
+
+
+
 
 

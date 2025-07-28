@@ -2,124 +2,145 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MediAI Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
       #chat-box::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
       }
       #chat-box::-webkit-scrollbar-thumb {
-        background-color: rgba(100, 116, 139, 0.4);
+        background-color: rgba(59, 130, 246, 0.5);
         border-radius: 10px;
       }
       #chat-box::-webkit-scrollbar-track {
-        background-color: transparent;
+        background-color: rgba(59, 130, 246, 0.1);
       }
       .fade-in {
-        animation: fadeIn 0.4s ease forwards;
+        animation: fadeIn 0.3s ease forwards;
       }
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(10px);
+          transform: translateY(8px);
         }
         to {
           opacity: 1;
           transform: translateY(0);
         }
       }
+      .typing-indicator::after {
+        content: '...';
+        animation: typing 1.5s infinite;
+      }
+      @keyframes typing {
+        0% { content: '.'; }
+        33% { content: '..'; }
+        66% { content: '...'; }
+      }
     </style>
   </head>
-  <body
-    class="bg-gradient-to-br from-blue-100 to-white min-h-screen flex items-center justify-center px-4"
-  >
-    <div
-      class="w-full max-w-2xl mx-auto mt-10 p-6 bg-white rounded-3xl shadow-2xl flex flex-col"
-    >
+  <body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl mx-auto p-0 bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden">
       <!-- Chat Header -->
-      <header class="flex items-center gap-4 mb-6 border-b pb-4">
-        <img
-          src="https://i.imgur.com/7k12EPD.png"
-          alt="MediAI Bot"
-          class="w-12 h-12 rounded-full border-2 border-blue-500"
-        />
-        <h2 class="text-3xl font-bold text-blue-700 select-none">
-          MediAI Assistant
-        </h2>
+      <header class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white">
+        <div class="relative">
+          <img
+            src="https://i.imgur.com/7k12EPD.png"
+            alt="MediAI Bot"
+            class="w-12 h-12 rounded-full border-2 border-white shadow-md"
+          />
+          <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></span>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold">MediAI Assistant</h2>
+          <p class="text-sm opacity-90">AI-powered health companion</p>
+        </div>
       </header>
-
-      <!-- Action Options -->
-      <div id="action-options" class="mb-6 flex justify-center gap-6">
-        <button
-          onclick="handleOptionClick('I want to book an appointment')"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full shadow-lg transition duration-200 ease-in-out"
-        >
-          Book Appointment
-        </button>
-        <button
-          onclick="handleOptionClick('Recommend product')"
-          class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full shadow-lg transition duration-200 ease-in-out"
-        >
-          Product Recommendation
-        </button>
-      </div>
 
       <!-- Chat Box -->
       <main
         id="chat-box"
-        class="h-96 overflow-y-auto border border-gray-300 rounded-2xl p-6 bg-gray-50 space-y-5 shadow-inner scroll-smooth"
+        class="flex-1 h-96 overflow-y-auto p-6 bg-white space-y-4 scroll-smooth"
       >
+        <!-- Welcome Message -->
+        <div class="flex justify-start fade-in">
+          <div class="max-w-[85%] flex flex-row items-end gap-3">
+            <img src="https://i.imgur.com/7k12EPD.png" alt="MediAI" class="w-8 h-8 rounded-full shadow">
+            <div class="bg-blue-50 px-4 py-3 rounded-2xl rounded-tl-none shadow-sm text-gray-800">
+              Hello! I'm your MediAI Assistant. How can I help you today? You can ask about symptoms, medications, or book appointments.
+            </div>
+          </div>
+        </div>
         <!-- Messages appear here -->
       </main>
 
       <!-- Chat Input -->
-      <form id="chat-form" class="mt-6 flex" autocomplete="off">
+      <form id="chat-form" class="p-4 bg-gray-50 border-t border-gray-200 flex items-center" autocomplete="off">
         <input
           type="text"
           id="chat-input"
           name="message"
-          class="flex-1 p-4 border border-gray-300 rounded-l-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-lg"
-          placeholder="Type your message here..."
+          class="flex-1 p-3 border border-gray-300 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-base transition-all"
+          placeholder="Type your health query..."
           required
+          autofocus
         />
         <button
           type="submit"
-          class="bg-blue-600 text-white px-8 rounded-r-2xl hover:bg-blue-700 transition duration-200 text-lg font-semibold"
+          class="bg-blue-600 text-white px-6 py-3 rounded-r-xl hover:bg-blue-700 transition duration-200 font-medium flex items-center justify-center"
         >
-          Send
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
+          </svg>
         </button>
       </form>
 
       <!-- Footer -->
-      <footer class="mt-6 text-center text-gray-400 text-sm select-none">
-        Powered by MediAI &mdash; Your AI health assistant
+      <footer class="py-3 text-center text-gray-500 text-xs bg-gray-50 border-t border-gray-200">
+        <p>Powered by MediAI &mdash; Your trusted health assistant</p>
+        <p class="mt-1">Not a substitute for professional medical advice</p>
       </footer>
     </div>
 
     <!-- Calendar Modal -->
     <div
       id="calendar-modal"
-      class="hidden fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center"
+      class="hidden fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center p-4"
     >
-      <div class="bg-white p-6 rounded-xl shadow-lg w-80">
-        <h3 class="text-xl font-semibold mb-4">Choose Appointment Date</h3>
+      <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold text-gray-800">Schedule Appointment</h3>
+          <button onclick="closeCalendar()" class="text-gray-400 hover:text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
         <input
           type="date"
           id="appointment-date"
-          class="w-full p-2 border rounded mb-4"
+          class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          min="<?php echo date('Y-m-d'); ?>"
         />
-        <button
-          onclick="submitAppointmentDate()"
-          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Confirm
-        </button>
-        <button
-          onclick="closeCalendar()"
-          class="ml-2 text-sm text-gray-500 hover:underline"
-        >
-          Cancel
-        </button>
+        <div class="flex gap-2">
+          <button
+            onclick="submitAppointmentDate()"
+            class="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 font-medium transition"
+          >
+            Confirm
+          </button>
+          <button
+            onclick="closeCalendar()"
+            class="flex-1 bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-300 font-medium transition"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
 
@@ -157,11 +178,11 @@
 
         const wrapper = document.createElement("div");
         wrapper.classList.add(
-          "max-w-[75%]",
+          "max-w-[85%]",
           "flex",
           from === "user" ? "flex-row-reverse" : "flex-row",
           "items-end",
-          "gap-3"
+          "gap-2.5"
         );
 
         const avatar = document.createElement("img");
@@ -170,23 +191,22 @@
             ? "https://i.imgur.com/7c3E1D6.png"
             : "https://i.imgur.com/7k12EPD.png";
         avatar.alt = from === "user" ? "You" : "MediAI";
-        avatar.classList.add("w-8", "h-8", "rounded-full", "shadow");
+        avatar.classList.add("w-8", "h-8", "rounded-full", "shadow", "flex-shrink-0");
 
-        const bubble = document.createElement("span");
+        const bubble = document.createElement("div");
         bubble.classList.add(
-          "inline-block",
-          "px-5",
+          "px-4",
           "py-3",
           "rounded-2xl",
-          "shadow",
+          "shadow-sm",
           "whitespace-pre-wrap",
           "break-words"
         );
 
         if (from === "user") {
-          bubble.classList.add("bg-blue-600", "text-white");
+          bubble.classList.add("bg-blue-600", "text-white", "rounded-br-none");
         } else {
-          bubble.classList.add("bg-gray-200", "text-gray-800");
+          bubble.classList.add("bg-gray-50", "text-gray-800", "rounded-bl-none");
         }
 
         bubble.innerHTML = message;
@@ -198,16 +218,51 @@
         return container;
       }
 
+      function createTypingIndicator() {
+        const container = document.createElement("div");
+        container.classList.add("flex", "justify-start", "fade-in");
+        
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("max-w-[85%]", "flex", "flex-row", "items-end", "gap-2.5");
+        
+        const avatar = document.createElement("img");
+        avatar.src = "https://i.imgur.com/7k12EPD.png";
+        avatar.alt = "MediAI";
+        avatar.classList.add("w-8", "h-8", "rounded-full", "shadow", "flex-shrink-0");
+        
+        const bubble = document.createElement("div");
+        bubble.classList.add(
+          "px-4",
+          "py-3",
+          "rounded-2xl",
+          "rounded-bl-none",
+          "shadow-sm",
+          "bg-gray-50",
+          "text-gray-800",
+          "typing-indicator"
+        );
+        bubble.textContent = "Typing";
+        
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(bubble);
+        container.appendChild(wrapper);
+        
+        return container;
+      }
+
       function createProductCard(product) {
         const wrapper = document.createElement("div");
         wrapper.classList.add(
           "bg-white",
-          "rounded-xl",
-          "shadow-md",
+          "rounded-lg",
+          "shadow-sm",
           "overflow-hidden",
-          "w-60",
+          "w-full",
+          "sm:w-56",
           "border",
-          "border-gray-200"
+          "border-gray-100",
+          "hover:shadow-md",
+          "transition-shadow"
         );
 
         const img = document.createElement("img");
@@ -215,34 +270,35 @@
           product.image_url ||
           "https://via.placeholder.com/240x160.png?text=No+Image";
         img.alt = product.name || "Product Image";
-        img.classList.add("w-full", "h-40", "object-cover");
+        img.classList.add("w-full", "h-36", "object-cover");
 
         const info = document.createElement("div");
-        info.classList.add("p-4");
+        info.classList.add("p-3");
 
         const name = document.createElement("h3");
         name.textContent = product.name || "Product Name";
-        name.classList.add("font-semibold", "text-gray-800", "text-lg", "mb-2");
+        name.classList.add("font-semibold", "text-gray-800", "text-base", "mb-1", "line-clamp-2");
 
         const price = document.createElement("p");
         price.textContent = `₹${product.price || "---"}`;
-        price.classList.add("text-blue-600", "font-bold");
+        price.classList.add("text-blue-600", "font-bold", "text-lg", "my-2");
 
         const button = document.createElement("a");
         button.href = `/add-to-cart/${product.product_id}/`;
         button.textContent = "Buy Now";
         button.classList.add(
-          "mt-2",
-          "inline-block",
+          "block",
+          "w-full",
           "bg-blue-500",
           "text-white",
           "px-4",
           "py-2",
-          "rounded-full",
+          "rounded-lg",
           "hover:bg-blue-600",
           "text-center",
           "text-sm",
-          "font-semibold"
+          "font-medium",
+          "transition"
         );
 
         info.appendChild(name);
@@ -256,11 +312,12 @@
       function displayProductRecommendations(products) {
         const cardContainer = document.createElement("div");
         cardContainer.classList.add(
-          "flex",
-          "flex-wrap",
+          "grid",
+          "grid-cols-1",
+          "sm:grid-cols-2",
           "gap-4",
           "fade-in",
-          "mt-4"
+          "mt-2"
         );
 
         products.forEach((p) => {
@@ -277,6 +334,7 @@
 
       function openCalendar() {
         document.getElementById("calendar-modal").classList.remove("hidden");
+        document.getElementById("appointment-date").focus();
       }
 
       function closeCalendar() {
@@ -315,6 +373,11 @@
         form.querySelector('button[type="submit"]').disabled = true;
         input.value = "";
 
+        // Show typing indicator
+        const typingIndicator = createTypingIndicator();
+        chatBox.appendChild(typingIndicator);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
         try {
           const response = await fetch("/chat-api/", {
             method: "POST",
@@ -326,6 +389,9 @@
           });
 
           const data = await response.json();
+
+          // Remove typing indicator
+          chatBox.removeChild(typingIndicator);
 
           if (data.response) {
             chatBox.appendChild(
@@ -339,9 +405,12 @@
 
           chatContext = data.context || {};
         } catch (err) {
+          // Remove typing indicator on error
+          chatBox.removeChild(typingIndicator);
+          
           chatBox.appendChild(
             createMessageElement(
-              "Sorry, something went wrong. Please try again.",
+              "Sorry, I'm having trouble connecting. Please try again shortly.",
               "bot"
             )
           );
@@ -351,6 +420,11 @@
           input.focus();
           chatBox.scrollTop = chatBox.scrollHeight;
         }
+      });
+
+      // Auto-focus input on page load
+      window.addEventListener('load', () => {
+        input.focus();
       });
     </script>
   </body>

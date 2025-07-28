@@ -88,12 +88,10 @@
                   </span>
                 </p>
                 <p class="text-sm">
-                  <span class="font-medium">Date:</span> {{
-                  order.ordered_at|date:"F j, Y H:i" }}
+                  <span class="font-medium">Date:</span> {{ order.ordered_at }}
                 </p>
                 <p class="text-sm">
-                  <span class="font-medium">Total:</span> ₹{{ order.total_price
-                  }}
+                  <span class="font-medium">Total:</span> ₹{{ order.total_price|default:"0.00" }}
                 </p>
               </div>
             </div>
@@ -103,8 +101,7 @@
               </h3>
               <div class="space-y-2">
                 <p class="text-sm">
-                  <span class="font-medium">Payment ID:</span> {{
-                  order.razorpay_payment_id|default:"Not available" }}
+                  <span class="font-medium">Payment ID:</span> <strong>{{ order.razorpay_payment_id|default:"Not available" }}</strong>
                 </p>
                 <p class="text-sm">
                   <span class="font-medium">Payment Status:</span>

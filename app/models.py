@@ -124,3 +124,33 @@ class Consultation(models.Model):
 
     def __str__(self):
         return f"Consultation: {self.user.email} with Dr. {self.doctor.name} on {self.appointment_date} at {self.appointment_time}"
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(CustomDoctor, on_delete=models.CASCADE)
+    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    notification_type = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"Notification for {self.user.username} - {self.notification_type}"
+    
+
+class ChatRoom(models.Model):
+    consultation = models.OneToOneField(Consultation, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+class ChatMessage(models.Model):
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    sender_doctor = models.ForeignKey(CustomDoctor, on_delete=models.CASCADE, null=True, blank=True)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def get_sender(self):
+        return self.sender if self.sender else self.sender_doctor

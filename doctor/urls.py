@@ -8,7 +8,7 @@ urlpatterns = [
     #Doctor
     path('doctor_register/',views.doctor_register,name='doctor_register'),
     path('doctor_login/',views.doctor_login,name='doctor_login'),
-    path('doctor_profile/',views.doctor_profile,name='doctor_profile'),
+    path('doctor/<int:doctor_id>/profile/', views.doctor_profile, name='doctor_profile'),
     path('doctor_logout/',views.doctor_logout,name='doctor_logout'),
     
 
@@ -39,11 +39,26 @@ urlpatterns = [
 
 
     #appoinment management
-    path('appointments/', views.appointments_list, name='appointments_list'),
+
+    path('admin_appointments/', views.admin_appointment_list, name='admin_appointment_list'),
+
     path('appointments/<int:consultation_id>/approve/', views.approve_appointment, name='approve_appointment'),
     path('appointments/<int:consultation_id>/decline/', views.decline_appointment, name='decline_appointment'),
 
+
+
+    path('doctor/<int:doctor_id>/history/', views.patient_history, name='patient_history'),
     
+
+
+    path('admin_orders_list/', views.admin_orders_list, name='admin_orders_list'),
+    path('export-orders/', views.export_orders, name='export_orders'),
+
+    #gemini
+    path('chat/', views.chat_with_gemini, name='chat_with_gemini'),
+    path('', views.chat_page_doctor, name='chat_page'),
+
+
 ]
 
 if settings.DEBUG:

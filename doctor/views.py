@@ -31,9 +31,11 @@ def admin_logout(request):
 
 
 def admin_dashboard(request):
-    return render(request,'admin_dashboard.html',{'current_user': request.user})
+    users = CustomUser.objects.filter(is_superuser=False).count()
+    doctors = CustomDoctor.objects.all().count()
+    products = Product.objects.all().count()
 
-
+    return render(request,'admin_dashboard.html',{'current_user': request.user, "users": users,'doctors':doctors,'products':products})
 
 
 #User management
@@ -61,6 +63,15 @@ def delete_user(request, user_id):
         return redirect("admin_user_manage")
 
     return HttpResponseForbidden("Invalid request method.")
+
+
+#admin appoinment manage
+def admin_appointment_list(request):
+    consultations = Consultation.objects.select_related('user', 'doctor').order_by('-appointment_date', '-appointment_time')
+    
+    return render(request, 'admin_appoinment_manage.html', {
+        'consultations': consultations,
+    })
 
 
 
@@ -176,6 +187,17 @@ def delete_product(request, product_id):
     return redirect('product_list')
 
 
+from app.models import Order
+def admin_orders_list(request):
+    query = request.GET.get('q')
+    if query:
+        orders = Order.objects.filter(order_number__icontains=query)
+    else:
+        orders = Order.objects.all().order_by('-ordered_at')
+
+    return render(request, 'admin_orders_list.html', {'orders': orders})
+
+
 #Doctor
 def doctor_register(request):
     if request.method == 'POST':
@@ -248,7 +270,7 @@ def doctor_login(request):
             doctor = CustomDoctor.objects.get(name=name)
             if check_password(password, doctor.password):
                 messages.success(request, f"Welcome, Dr. {doctor.name}!")
-                return redirect('doctor_profile') 
+                return redirect('doctor_profile',doctor_id=doctor.id) 
             else:
                 messages.error(request, "Invalid password.")
         except CustomDoctor.DoesNotExist:
@@ -258,8 +280,54 @@ def doctor_login(request):
 
 
 
-def doctor_profile(request):
-    return render(request,'doctor_profile.html')
+from django.utils.timezone import now
+from django.db.models import Min
+
+def doctor_profile(request,doctor_id):
+    doctor = get_object_or_404(CustomDoctor, id=doctor_id)
+
+    consultations = Consultation.objects.filter(doctor=doctor).order_by('appointment_date', 'appointment_time')
+    pending_count = Consultation.objects.filter(doctor=doctor, status='pending').count()
+
+    # Get current month and year
+    today = now().date()
+    current_month = today.month
+    current_year = today.year
+
+    first_consults = (
+        Consultation.objects.filter(doctor=doctor)
+        .values('user')
+        .annotate(first_date=Min('appointment_date'))
+    )
+    
+    new_patients_this_month = sum(
+        1 for fc in first_consults
+        if fc['first_date'].month == current_month and fc['first_date'].year == current_year
+    )
+
+
+    context = {
+        'consultations': consultations,
+        'doctor': doctor,
+        'pending_count': pending_count,
+        'new_patients_count': new_patients_this_month,
+
+    }
+    return render(request, 'doctor_profile.html', context)
+
+
+def patient_history(request, doctor_id):
+    doctor = get_object_or_404(CustomDoctor, id=doctor_id)
+
+    history = Consultation.objects.filter(doctor=doctor).order_by('-appointment_date')
+    
+
+    context = {
+        'consultations': history,
+        'doctor': doctor,
+    }
+    return render(request, 'patient_history.html', context)
+
 
 
 
@@ -269,21 +337,8 @@ def doctor_logout(request):
 
 
 from app.models import Consultation
-
-#Appoinment management
-def appointments_list(request):
-    print("View loaded")
-    consultations = Consultation.objects.all().order_by('appointment_date', 'appointment_time')
-    print(f"Consultations Query: {consultations.query}")  # Debug SQL query
-    print(f"Consultations Count: {consultations.count()}")  # Debug count
-    
-    for consultation in consultations:
-        print(f"Consultation: {consultation.id}, User: {consultation.user.username if consultation.user else 'None'}, Date: {consultation.appointment_date}, Time: {consultation.appointment_time}")
-    
-    context = {
-        'consultations': consultations,
-    }
-    return render(request, 'doctor_profile.html', context)
+from app.models import Notification
+from django.shortcuts import get_object_or_404
 
 
 def approve_appointment(request, consultation_id):
@@ -291,7 +346,18 @@ def approve_appointment(request, consultation_id):
     if request.method == 'POST':
         consultation.status = 'confirmed'
         consultation.save()
-    return redirect('doctor_profile')
+        
+        # Create notification
+        Notification.objects.create(
+            user=consultation.user,
+            doctor=consultation.doctor,
+            consultation=consultation,
+            message=f"Your appointment with Dr. {consultation.doctor.name} on {consultation.appointment_date} has been approved!",
+            notification_type='appointment_approved'
+        )
+        
+        messages.success(request, "Appointment approved and notification sent to patient.")
+    return redirect('doctor_profile',doctor_id=consultation.doctor.id)
 
 
 def decline_appointment(request, consultation_id):
@@ -299,4 +365,77 @@ def decline_appointment(request, consultation_id):
     if request.method == 'POST':
         consultation.status = 'cancelled'
         consultation.save()
-    return redirect('doctor_profile')
+    return redirect('doctor_profile',doctor_id=consultation.doctor.id)
+
+
+from django.template.loader import get_template
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+from io import BytesIO
+from django.http import HttpResponse
+
+def export_orders(request):
+    # Get data
+    orders = Order.objects.prefetch_related('items', 'user').all()
+    
+    # Render the HTML template with context
+    template = get_template('admin_orders_pdf.html')  # You must create this template
+    html = template.render({'orders': orders})
+    
+    # Prepare PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="orders.pdf"'
+
+    # Create PDF
+    pisa_status = pisa.CreatePDF(BytesIO(html.encode('UTF-8')), dest=response, encoding='UTF-8')
+    
+    # Return error if any
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    
+    return response
+
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import json
+import google.generativeai as genai
+
+# Configure Gemini API
+genai.configure(api_key=settings.GOOGLE_API_KEY)
+
+# Initialize the Gemini model
+# You can choose different models like "gemini-pro", "gemini-1.5-flash", etc.
+# Check the Gemini API documentation for available models.
+model = genai.GenerativeModel("gemini-1.5-flash")
+chat = model.start_chat(history=[]) # For maintaining conversation history
+
+@csrf_exempt # Use this carefully for API endpoints, consider Django's CSRF tokens for forms
+def chat_with_gemini(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_message = data.get("message")
+
+            if not user_message:
+                return JsonResponse({"error": "No message provided"}, status=400)
+
+            # Send message to Gemini and get response
+            response = chat.send_message(user_message)
+            bot_reply = response.text
+
+            return JsonResponse({"reply": bot_reply})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"message": "Send a POST request with a 'message' to chat with Gemini."}, status=200)
+
+
+def chat_page_doctor(request):
+    return render(request, 'chatbot_page.html')

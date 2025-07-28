@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Appointments (Admin)</title>
+
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100">
+
+  <!-- Sidebar Include -->
+  {% include 'admin_sidebar.html' %}
+
+  <!-- Main Content -->
+  <div class="ml-64 p-6">
+    <div class="bg-white rounded shadow-sm mb-8">
+      <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-800">All Appointments</h1>
+      </div>
+
+      <div class="p-6 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-sm text-left text-gray-700">
+          <thead class="bg-indigo-600 text-white text-xs uppercase tracking-wider">
+            <tr>
+              <th class="px-6 py-3">Doctor</th>
+              <th class="px-6 py-3">Patient</th>
+              <th class="px-6 py-3">Date</th>
+              <th class="px-6 py-3">Time</th>
+              <th class="px-6 py-3">Status</th>
+              <th class="px-6 py-3">Booked At</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for c in consultations %}
+            <tr class="hover:bg-gray-50 transition duration-150">
+              <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ c.doctor.name }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ c.user.email }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ c.appointment_date }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ c.appointment_time }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                  {% if c.status == 'completed' %}bg-green-100 text-green-800
+                  {% elif c.status == 'cancelled' %}bg-red-100 text-red-800
+                  {% else %}bg-blue-100 text-blue-800{% endif %}">
+                  {{ c.status|capfirst }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ c.booked_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-gray-500">No appointments found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

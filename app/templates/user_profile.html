@@ -3,13 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile Settings</title>
+    <title>Profile Settings | HealthConnect</title>
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
-            colors: { primary: "#4f46e5", secondary: "#8b5cf6" },
+            colors: { 
+              primary: "#4f46e5", 
+              primaryDark: "#4338ca",
+              secondary: "#8b5cf6",
+              success: "#10b981",
+              danger: "#ef4444",
+              warning: "#f59e0b",
+              info: "#3b82f6"
+            },
             borderRadius: {
               none: "0px",
               sm: "4px",
@@ -22,6 +30,10 @@
               full: "9999px",
               button: "8px",
             },
+            boxShadow: {
+              card: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
+              hover: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)"
+            }
           },
         },
       };
@@ -29,7 +41,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap"
       rel="stylesheet"
     />
     <link
@@ -37,119 +49,55 @@
       rel="stylesheet"
     />
     <style>
-      :where([class^="ri-"])::before {
-        content: "\f3c2";
-      }
       body {
-        font-family: "Inter", sans-serif;
-        background-color: #f9fafb;
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
       }
       input[type="number"]::-webkit-inner-spin-button,
       input[type="number"]::-webkit-outer-spin-button {
         -webkit-appearance: none;
         margin: 0;
       }
-      .custom-checkbox {
-        position: relative;
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-      }
-      .custom-checkbox input {
-        opacity: 0;
-        position: absolute;
-      }
-      .checkmark {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 20px;
-        width: 20px;
-        background-color: #fff;
-        border: 2px solid #d1d5db;
-        border-radius: 4px;
+      .sidebar-item {
         transition: all 0.2s ease;
       }
-      .custom-checkbox input:checked ~ .checkmark {
-        background-color: #4f46e5;
-        border-color: #4f46e5;
+      .sidebar-item:hover {
+        background-color: #f1f5f9;
       }
-      .checkmark:after {
-        content: "";
-        position: absolute;
-        display: none;
+      .sidebar-item.active {
+        background-color: rgba(79, 70, 229, 0.1);
+        color: #4f46e5;
       }
-      .custom-checkbox input:checked ~ .checkmark:after {
-        display: block;
+      .profile-info-label {
+        color: #64748b;
       }
-      .custom-checkbox .checkmark:after {
-        left: 6px;
-        top: 2px;
-        width: 6px;
-        height: 12px;
-        border: solid white;
-        border-width: 0 2px 2px 0;
-        transform: rotate(45deg);
+      .profile-info-value {
+        color: #1e293b;
       }
-      .custom-switch {
-        position: relative;
-        display: inline-block;
-        width: 48px;
-        height: 24px;
-      }
-      .custom-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .switch-slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #e5e7eb;
-        transition: 0.4s;
-        border-radius: 24px;
-      }
-      .switch-slider:before {
-        position: absolute;
-        content: "";
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        bottom: 3px;
-        background-color: white;
-        transition: 0.4s;
-        border-radius: 50%;
-      }
-      input:checked + .switch-slider {
-        background-color: #4f46e5;
-      }
-      input:checked + .switch-slider:before {
-        transform: translateX(24px);
+      .transition-all {
+        transition: all 0.3s ease;
       }
     </style>
   </head>
-  <body class="min-h-screen">
+  <body class="min-h-screen bg-gray-50">
     <div class="flex min-h-screen">
       <!-- Sidebar -->
-      <aside class="w-64 bg-white border-r border-gray-200 fixed h-full">
-        <div class="p-6">
+      <aside class="w-64 bg-white border-r border-gray-200 fixed h-full hidden md:block">
+        <div class="p-6 flex flex-col h-full">
           <div class="flex flex-col items-center mb-8">
-            <h3
-              class="mt-4 text-2xl font-['Pacifico'] font-semibold text-indigo-600 tracking-wide capitalize"
-            >
+            <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-3">
+              <i class="ri-user-fill text-indigo-600 text-2xl"></i>
+            </div>
+            <h3 class="mt-2 text-2xl font-['Pacifico'] font-semibold text-indigo-600 tracking-wide">
               Hey, {{ profiles.username }}
             </h3>
+            <p class="text-sm text-gray-500 mt-1">{{ profiles.email }}</p>
           </div>
 
-          <nav class="space-y-1">
+          <nav class="flex-1 space-y-1">
             <a
               href="#"
-              class="flex items-center px-4 py-3 text-sm font-medium rounded-md bg-primary bg-opacity-10 text-primary"
+              class="sidebar-item active flex items-center px-4 py-3 text-sm font-medium rounded-md"
             >
               <div class="w-5 h-5 mr-3 flex items-center justify-center">
                 <i class="ri-user-line"></i>
@@ -157,181 +105,251 @@
               Profile
             </a>
             <a
-              href="#"
-              class="flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50"
+              href="{% url 'appointment_list' %}"
+              class="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700"
             >
               <div class="w-5 h-5 mr-3 flex items-center justify-center">
-                <i class="ri-shield-check-line"></i>
+                <i class="ri-calendar-line"></i>
               </div>
-              Security
+              Appointments
             </a>
             <a
-              href="#"
-              class="flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50"
+              href="{% url 'notification_list' %}"
+              class="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700"
             >
               <div class="w-5 h-5 mr-3 flex items-center justify-center">
                 <i class="ri-notification-line"></i>
               </div>
               Notifications
-            </a>
-            <a
-              href="#"
-              class="flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              <div class="w-5 h-5 mr-3 flex items-center justify-center">
-                <i class="ri-bank-card-line"></i>
-              </div>
-              Billing
-            </a>
-            <a
-              href="#"
-              class="flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              <div class="w-5 h-5 mr-3 flex items-center justify-center">
-                <i class="ri-team-line"></i>
-              </div>
-              Team
-            </a>
-            <a
-              href="#"
-              class="flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              <div class="w-5 h-5 mr-3 flex items-center justify-center">
-                <i class="ri-settings-line"></i>
-              </div>
-              Settings
+              <span class="ml-auto bg-primary text-white text-xs px-2 py-1 rounded-full">3</span>
             </a>
           </nav>
-        </div>
 
-        <div class="absolute bottom-0 w-full p-6 border-t border-gray-200">
-          <a
-            href="{% url 'logout' %}"
-            class="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
-          >
-            <div class="w-5 h-5 mr-3 flex items-center justify-center">
-              <i class="ri-logout-box-line"></i>
-            </div>
-            Log out
-          </a>
+          <div class="border-t border-gray-200 pt-6">
+            <a
+              href="{% url 'logout' %}"
+              class="sidebar-item flex items-center text-sm font-medium text-gray-700"
+            >
+              <div class="w-5 h-5 mr-3 flex items-center justify-center">
+                <i class="ri-logout-box-line"></i>
+              </div>
+              Log out
+            </a>
+          </div>
         </div>
       </aside>
 
+      <!-- Mobile Header -->
+      <header class="md:hidden fixed top-0 left-0 right-0 bg-white shadow-sm z-10 p-4 flex items-center justify-between">
+        <button id="mobile-menu-button" class="text-gray-700">
+          <i class="ri-menu-line text-2xl"></i>
+        </button>
+        <h1 class="text-xl font-bold text-indigo-600">Profile</h1>
+        <div class="w-8"></div> <!-- Spacer for balance -->
+      </header>
+
+      <!-- Mobile Sidebar -->
+      <div id="mobile-sidebar" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden">
+        <div class="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-lg">
+          <div class="p-6 flex flex-col h-full">
+            <div class="flex justify-end mb-4">
+              <button id="close-mobile-menu" class="text-gray-500">
+                <i class="ri-close-line text-2xl"></i>
+              </button>
+            </div>
+            <div class="flex flex-col items-center mb-8">
+              <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-3">
+                <i class="ri-user-fill text-indigo-600 text-2xl"></i>
+              </div>
+              <h3 class="mt-2 text-2xl font-['Pacifico'] font-semibold text-indigo-600 tracking-wide">
+                Hey, {{ profiles.username }}
+              </h3>
+              <p class="text-sm text-gray-500 mt-1">{{ profiles.email }}</p>
+            </div>
+
+            <nav class="flex-1 space-y-1">
+              <a
+                href="#"
+                class="sidebar-item active flex items-center px-4 py-3 text-sm font-medium rounded-md"
+              >
+                <div class="w-5 h-5 mr-3 flex items-center justify-center">
+                  <i class="ri-user-line"></i>
+                </div>
+                Profile
+              </a>
+              <a
+                href="{% url 'appointment_list' %}"
+                class="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700"
+              >
+                <div class="w-5 h-5 mr-3 flex items-center justify-center">
+                  <i class="ri-calendar-line"></i>
+                </div>
+                Appointments
+              </a>
+              <a
+                href="{% url 'notification_list' %}"
+                class="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700"
+              >
+                <div class="w-5 h-5 mr-3 flex items-center justify-center">
+                  <i class="ri-notification-line"></i>
+                </div>
+                Notifications
+                <span class="ml-auto bg-primary text-white text-xs px-2 py-1 rounded-full">3</span>
+              </a>
+            </nav>
+
+            <div class="border-t border-gray-200 pt-6">
+              <a
+                href="{% url 'logout' %}"
+                class="sidebar-item flex items-center text-sm font-medium text-gray-700"
+              >
+                <div class="w-5 h-5 mr-3 flex items-center justify-center">
+                  <i class="ri-logout-box-line"></i>
+                </div>
+                Log out
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Main Content -->
-      <main class="flex-1 ml-64 p-8">
+      <main class="flex-1 md:ml-64 p-4 md:p-8 mt-16 md:mt-0">
         <div class="max-w-4xl mx-auto">
           <div class="flex items-center justify-between mb-8">
-            <h1 class="text-2xl font-bold text-gray-900">Profile</h1>
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">Profile Settings</h1>
+              <p class="text-gray-600">Manage your personal information and preferences</p>
+            </div>
+            <div class="flex space-x-3">
+              <a
+                href="{% url 'edit_profile_user' profiles.id %}"
+                class="flex items-center px-4 py-2 bg-primary hover:bg-primaryDark text-white text-sm font-medium rounded-lg transition-all shadow-sm hover:shadow-md"
+              >
+                <i class="ri-edit-line mr-2"></i>
+                Edit Profile
+              </a>
+            </div>
           </div>
 
-
-          <!-- Combined Profile Information Section -->
-          <div
-            class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8 overflow-hidden"
-            id="profile-info-section"
-          >
-            <div class="p-6">
-              <div class="flex items-center justify-between mb-6">
-                <h2 class="text-lg font-semibold text-indigo-700 tracking-wide">
-                  Profile Information
-                </h2>
-                <button
-                  id="edit-profile-btn"
-                  class="text-primary hover:text-primary-dark flex items-center text-sm font-medium !rounded-button"
-                >
-                  <div class="w-4 h-4 mr-1 flex items-center justify-center">
-                    <i class="ri-edit-line"></i>
+          {% if messages %}
+          <div class="mb-6 space-y-3">
+            {% for message in messages %}
+              {% if message.tags == 'success' %}
+                <div class="flex items-center p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div class="flex-shrink-0">
+                    <i class="ri-checkbox-circle-fill text-green-500 text-xl"></i>
                   </div>
-                  Edit
-                </button>
-                <div id="save-profile-btns" class="hidden space-x-3">
-                  <button
-                    id="cancel-profile-btn"
-                    class="text-gray-700 bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-medium !rounded-button whitespace-nowrap"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    id="save-profile-btn"
-                    class="text-white bg-primary hover:bg-primary/90 px-4 py-2 text-sm font-medium !rounded-button whitespace-nowrap"
-                  >
-                    Save Changes
-                  </button>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800">{{ message }}</p>
+                  </div>
                 </div>
+              {% elif message.tags == 'error' %}
+                <div class="flex items-center p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div class="flex-shrink-0">
+                    <i class="ri-close-circle-fill text-red-500 text-xl"></i>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium text-red-800">{{ message }}</p>
+                  </div>
+                </div>
+              {% elif message.tags == 'info' %}
+                <div class="flex items-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div class="flex-shrink-0">
+                    <i class="ri-information-fill text-blue-500 text-xl"></i>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium text-blue-800">{{ message }}</p>
+                  </div>
+                </div>
+              {% else %}
+                <div class="flex items-center p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div class="flex-shrink-0">
+                    <i class="ri-information-fill text-gray-500 text-xl"></i>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-800">{{ message }}</p>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <!-- Profile Information Card -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-8 overflow-hidden">
+            <div class="p-6 md:p-8">
+              <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-semibold text-gray-900">
+                  <i class="ri-user-3-line text-primary mr-2"></i>
+                  Personal Information
+                </h2>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Username -->
                 <div>
-                  <div class="view-mode">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
-                      >Username</label
-                    >
-                    <p class="text-gray-900">{{ profiles.username }}</p>
-                  </div>
+                  <label class="block text-sm font-medium profile-info-label mb-1">Username</label>
+                  <p class="text-base font-medium profile-info-value">{{ profiles.username }}</p>
                 </div>
 
                 <!-- Email -->
                 <div>
-                  <div class="view-mode">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
-                      >Email Address</label
-                    >
-                    <p class="text-gray-900">{{ profiles.email }}</p>
-                  </div>
+                  <label class="block text-sm font-medium profile-info-label mb-1">Email Address</label>
+                  <p class="text-base font-medium profile-info-value">{{ profiles.email }}</p>
                 </div>
 
                 <!-- Phone -->
                 <div>
-                  <div class="view-mode">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
-                      >Phone Number</label
-                    >
-                    <p class="text-gray-900">{{ profiles.phone_number }}</p>
-                  </div>
+                  <label class="block text-sm font-medium profile-info-label mb-1">Phone Number</label>
+                  <p class="text-base font-medium profile-info-value">{{ profiles.phone_number }}</p>
                 </div>
 
                 <!-- Address -->
                 <div>
-                  <div class="view-mode">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
-                      >Address</label
-                    >
-                    <p class="text-gray-900">{{ profiles.address }}</p>
-                  </div>
+                  <label class="block text-sm font-medium profile-info-label mb-1">Address</label>
+                  <p class="text-base font-medium profile-info-value">{{ profiles.address }}</p>
                 </div>
 
                 <!-- Zip -->
                 <div>
-                  <div class="view-mode">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
-                      >Zip/Postal Code</label
-                    >
-                    <p class="text-gray-900">{{ profiles.pincode }}</p>
-                  </div>
-                  <div class="edit-mode hidden">
-                    <label
-                      for="zip"
-                      class="block text-sm font-medium text-gray-700 mb-1"
-                      >Zip/Postal Code</label
-                    >
-                    <input
-                      type="text"
-                      id="zip"
-                      value="{{ profiles.pincode }}"
-                      class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                    />
-                  </div>
+                  <label class="block text-sm font-medium profile-info-label mb-1">Zip/Postal Code</label>
+                  <p class="text-base font-medium profile-info-value">{{ profiles.pincode }}</p>
                 </div>
 
                 <!-- Country -->
                 <div>
-                  <div class="view-mode">
-                    <label class="block text-sm font-medium text-gray-700 mb-1"
-                      >Country</label
-                    >
-                    <p class="text-gray-900">{{ profiles.country }}</p>
+                  <label class="block text-sm font-medium profile-info-label mb-1">Country</label>
+                  <p class="text-base font-medium profile-info-value">{{ profiles.country }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Security Card -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 md:p-8">
+              <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-semibold text-gray-900">
+                  <i class="ri-shield-keyhole-line text-primary mr-2"></i>
+                  Account Security
+                </h2>
+              </div>
+
+              <div class="space-y-6">
+                <!-- Password -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between">
+                  <div>
+                    <h3 class="text-base font-medium text-gray-900">Password</h3>
+                    <p class="text-sm text-gray-500 mt-1">Last changed 3 months ago</p>
                   </div>
+                  <a 
+                    href="{% url 'forgot-password' %}" 
+                    class="mt-3 md:mt-0 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all"
+                  >
+                    <i class="ri-lock-password-line mr-2"></i>
+                    Change Password
+                  </a>
                 </div>
               </div>
             </div>
@@ -339,5 +357,23 @@
         </div>
       </main>
     </div>
+
+    <script>
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        document.getElementById('mobile-sidebar').classList.remove('hidden');
+      });
+      
+      document.getElementById('close-mobile-menu').addEventListener('click', function() {
+        document.getElementById('mobile-sidebar').classList.add('hidden');
+      });
+      
+      // Close mobile menu when clicking outside
+      document.getElementById('mobile-sidebar').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.add('hidden');
+        }
+      });
+    </script>
   </body>
 </html>

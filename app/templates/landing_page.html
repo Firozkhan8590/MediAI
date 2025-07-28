@@ -19,6 +19,8 @@
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -41,6 +43,16 @@
               full: "9999px",
               button: "8px",
             },
+            animation: {
+              'pulse-slow': 'pulse 6s infinite cubic-bezier(0.4, 0, 0.6, 1)',
+              'float': 'float 6s ease-in-out infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              }
+            }
           },
         },
       };
@@ -51,6 +63,7 @@
       }
       body {
         font-family: "Open Sans", sans-serif;
+        overflow-x: hidden;
       }
       input:focus,
       button:focus {
@@ -61,6 +74,40 @@
         -webkit-appearance: none;
         margin: 0;
       }
+      
+      .pulse-ring {
+        display: block;
+        border-radius: 9999px;
+        animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+      }
+      
+      @keyframes pulse-ring {
+        0% {
+          transform: scale(0.9);
+          opacity: 1;
+        }
+        80%, 100% {
+          opacity: 0;
+          transform: scale(1.4);
+        }
+      }
+      
+      .ai-chip {
+        background: linear-gradient(135deg, rgba(30, 136, 229, 0.1) 0%, rgba(30, 136, 229, 0.3) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .medical-wave {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%231E88E5' fill-opacity='1' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+        background-size: cover;
+        background-repeat: no-repeat;
+      }
     </style>
   </head>
   <body class="min-h-screen">
@@ -70,7 +117,10 @@
         class="container mx-auto px-6 py-4 flex items-center justify-between"
       >
         <div class="flex items-center">
-          <a href="#" class="text-3xl text-primary">Medi AI</a>
+          <a href="#" class="text-3xl text-primary font-bold flex items-center">
+            <i class="ri-heart-pulse-fill mr-2"></i>
+            MediAI
+          </a>
         </div>
         <nav class="hidden md:flex items-center space-x-8">
           <a
@@ -123,25 +173,44 @@
         </div>
       </div>
     </header>
+    
     <!-- Hero Section -->
     <section class="relative w-full overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent z-0"></div>
+      <div class="absolute right-0 top-0 w-1/2 h-full z-0">
+        <div class="absolute inset-0 bg-gradient-to-l from-primary/20 to-transparent"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="relative w-64 h-64">
+            <div class="absolute inset-0 bg-primary/10 rounded-full blur-xl animate-pulse-slow"></div>
+            <div class="absolute inset-4 bg-white/20 rounded-full blur-lg"></div>
+            <div class="absolute inset-8 flex items-center justify-center">
+              <i class="ri-artificial-intelligence-line text-6xl text-primary animate-float"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div
         style="
-          background-image: url('https://readdy.ai/api/search-image?query=A%20modern%2C%20clean%20medical%20technology%20illustration%20with%20a%20gradient%20blue%20background.%20The%20right%20side%20shows%20futuristic%20medical%20AI%20interface%20elements%2C%20holographic%20displays%20with%20health%20data%2C%20and%20subtle%20medical%20symbols.%20The%20left%20side%20is%20clean%20and%20minimal%20with%20ample%20space%20for%20text.%20The%20transition%20between%20text%20area%20and%20image%20is%20smooth%20and%20natural.%20Professional%20healthcare%20technology%20aesthetic%20with%20soft%20lighting.&width=1920&height=800&seq=1&orientation=landscape');
+          background-image: url('https://assets.clevelandclinic.org/transform/3e9f2415-20c9-45a8-a0ef-4f415008a18a/healthcare-workers-ai-1359494953');
           background-size: cover;
           background-position: center;
         "
         class="w-full"
       >
         <div
-          class="container mx-auto px-6 py-24 md:py-32 flex flex-col md:flex-row items-center"
+          class="container mx-auto px-6 py-24 md:py-32 flex flex-col md:flex-row items-center relative z-10"
         >
-          <div class="w-full md:w-1/2 z-10">
-            <div class="bg-white/90 p-10 rounded-lg backdrop-blur-sm">
+          <div class="w-full md:w-1/2 z-10" data-aos="fade-right" data-aos-duration="800">
+            <div class="bg-white/90 p-10 rounded-lg backdrop-blur-sm shadow-xl">
+              <div class="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
+                <i class="ri-flask-line mr-2"></i>
+                <span class="text-sm font-semibold">AI-Powered Diagnostics</span>
+              </div>
               <h1
                 class="text-4xl md:text-5xl font-bold text-dark mb-4 leading-tight"
               >
-                AI-Powered Healthcare Solutions
+                Transforming Healthcare with <span class="text-primary">Artificial Intelligence</span>
               </h1>
               <p class="text-lg text-gray-700 mb-8">
                 Revolutionizing patient care with advanced artificial
@@ -151,20 +220,78 @@
               <div class="flex flex-col sm:flex-row gap-4">
                 <a
                   href="{% url 'register' %}"
-                  class="bg-primary text-white px-8 py-3 !rounded-button hover:bg-primary/90 transition-colors font-semibold whitespace-nowrap inline-flex items-center justify-center"
+                  class="bg-primary text-white px-8 py-3 !rounded-button hover:bg-primary/90 transition-colors font-semibold whitespace-nowrap inline-flex items-center justify-center shadow-lg hover:shadow-xl"
                 >
                   Get Started
+                  <i class="ri-arrow-right-line ml-2"></i>
                 </a>
+                <a
+                  href="https://www.youtube.com/watch?v=g632EG9s1Mc"
+                  class="border-2 border-primary text-primary px-8 py-3 !rounded-button hover:bg-primary/5 transition-colors font-semibold whitespace-nowrap inline-flex items-center justify-center"
+                >
+                  <i class="ri-play-circle-line mr-2"></i>
+                  Watch Demo
+                </a>
+              </div>
+              
+              <div class="mt-8 flex items-center space-x-4">
+                <div class="flex -space-x-2">
+                  <div class="w-10 h-10 rounded-full border-2 border-white bg-primary/80 flex items-center justify-center text-white">
+                    <i class="ri-user-line"></i>
+                  </div>
+                  <div class="w-10 h-10 rounded-full border-2 border-white bg-primary/60 flex items-center justify-center text-white">
+                    <i class="ri-user-line"></i>
+                  </div>
+                  <div class="w-10 h-10 rounded-full border-2 border-white bg-primary/40 flex items-center justify-center text-white">
+                    <i class="ri-user-line"></i>
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm text-gray-600">Trusted by 500+ healthcare professionals</div>
+                  <div class="flex items-center">
+                    <i class="ri-star-fill text-yellow-400"></i>
+                    <i class="ri-star-fill text-yellow-400"></i>
+                    <i class="ri-star-fill text-yellow-400"></i>
+                    <i class="ri-star-fill text-yellow-400"></i>
+                    <i class="ri-star-fill text-yellow-400"></i>
+                    <span class="ml-2 text-sm font-medium">4.9/5</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- Stats Section -->
+    <section class="py-12 bg-primary text-white">
+      <div class="container mx-auto px-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div class="p-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="text-4xl font-bold mb-2">99.4%</div>
+            <div class="text-sm opacity-80">Diagnostic Accuracy</div>
+          </div>
+          <div class="p-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="text-4xl font-bold mb-2">500+</div>
+            <div class="text-sm opacity-80">Healthcare Partners</div>
+          </div>
+          <div class="p-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="text-4xl font-bold mb-2">2M+</div>
+            <div class="text-sm opacity-80">Patients Served</div>
+          </div>
+          <div class="p-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="text-4xl font-bold mb-2">24/7</div>
+            <div class="text-sm opacity-80">AI Monitoring</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Key Features Section -->
     <section class="py-20 bg-white">
       <div class="container mx-auto px-6">
-        <div class="text-center mb-16">
+        <div class="text-center mb-16" data-aos="fade-up">
           <h2 class="text-3xl md:text-4xl font-bold text-dark mb-4">
             Powerful AI Features
           </h2>
@@ -175,26 +302,50 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div
-            class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+            class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+            data-aos="fade-up"
+            data-aos-delay="100"
           >
-            <div
-              class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-6"
-            >
-              <i class="ri-brain-line ri-xl text-primary"></i>
+            <div class="relative">
+              <div
+                class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-6"
+              >
+                <i class="ri-brain-line ri-xl text-primary"></i>
+              </div>
+              <div class="pulse-ring absolute top-0 left-0 w-16 h-16 bg-primary/20 rounded-full"></div>
             </div>
             <h3 class="text-xl font-semibold mb-3">Diagnostic Assistance</h3>
             <p class="text-gray-600">
               Advanced image recognition algorithms analyze medical scans with
               99.4% accuracy, helping doctors identify conditions faster.
             </p>
+            <div class="mt-4">
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="ri-checkbox-circle-fill text-primary mr-2"></i>
+                <span>Radiology scans</span>
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="ri-checkbox-circle-fill text-primary mr-2"></i>
+                <span>Pathology slides</span>
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="ri-checkbox-circle-fill text-primary mr-2"></i>
+                <span>Dermatology images</span>
+              </div>
+            </div>
           </div>
           <div
-            class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+            class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+            data-aos="fade-up"
+            data-aos-delay="200"
           >
-            <div
-              class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-6"
-            >
-              <i class="ri-file-chart-line ri-xl text-primary"></i>
+            <div class="relative">
+              <div
+                class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-6"
+              >
+                <i class="ri-file-chart-line ri-xl text-primary"></i>
+              </div>
+              <div class="pulse-ring absolute top-0 left-0 w-16 h-16 bg-primary/20 rounded-full"></div>
             </div>
             <h3 class="text-xl font-semibold mb-3">Predictive Analytics</h3>
             <p class="text-gray-600">
@@ -202,28 +353,171 @@
               complications, enabling proactive care and personalized treatment
               plans.
             </p>
+            <div class="mt-4">
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="ri-checkbox-circle-fill text-primary mr-2"></i>
+                <span>Risk assessment</span>
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="ri-checkbox-circle-fill text-primary mr-2"></i>
+                <span>Treatment optimization</span>
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="ri-checkbox-circle-fill text-primary mr-2"></i>
+                <span>Readmission prediction</span>
+              </div>
+            </div>
           </div>
           <div
-            class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+            class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+            data-aos="fade-up"
+            data-aos-delay="300"
           >
-            <div
-              class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-6"
-            >
-              <i class="ri-shield-check-line ri-xl text-primary"></i>
+            <div class="relative">
+              <div
+                class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-6"
+              >
+                <i class="ri-shield-check-line ri-xl text-primary"></i>
+              </div>
+              <div class="pulse-ring absolute top-0 left-0 w-16 h-16 bg-primary/20 rounded-full"></div>
             </div>
             <h3 class="text-xl font-semibold mb-3">Secure Data Processing</h3>
             <p class="text-gray-600">
               HIPAA-compliant platform with end-to-end encryption ensures
               patient data remains secure while delivering valuable insights.
             </p>
+            <div class="mt-4">
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="ri-checkbox-circle-fill text-primary mr-2"></i>
+                <span>End-to-end encryption</span>
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="ri-checkbox-circle-fill text-primary mr-2"></i>
+                <span>Regular audits</span>
+              </div>
+              <div class="flex items-center text-sm text-gray-500">
+                <i class="ri-checkbox-circle-fill text-primary mr-2"></i>
+                <span>Role-based access</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
-    <!-- How It Works Section -->
-    <section class="py-20 bg-secondary">
+
+    <!-- AI in Action Section -->
+    <section class="py-20 bg-secondary relative overflow-hidden">
+      <div class="medical-wave"></div>
       <div class="container mx-auto px-6">
-        <div class="text-center mb-16">
+        <div class="flex flex-col md:flex-row items-center">
+          <div class="w-full md:w-1/2 mb-12 md:mb-0" data-aos="fade-right">
+            <div class="relative">
+              <div class="bg-white p-8 rounded-lg shadow-xl z-10 relative">
+                <h2 class="text-3xl font-bold text-dark mb-4">See MediAI in Action</h2>
+                <p class="text-gray-600 mb-6">
+                  Our AI platform analyzes medical data in real-time, providing clinicians with actionable insights at the point of care.
+                </p>
+                <div class="space-y-4">
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 mt-1">
+                      <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <i class="ri-check-line text-primary"></i>
+                      </div>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-gray-800 font-medium">Real-time analysis</p>
+                      <p class="text-gray-600 text-sm">Instant results with no waiting time</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 mt-1">
+                      <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <i class="ri-check-line text-primary"></i>
+                      </div>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-gray-800 font-medium">Explainable AI</p>
+                      <p class="text-gray-600 text-sm">Understand how conclusions are reached</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 mt-1">
+                      <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <i class="ri-check-line text-primary"></i>
+                      </div>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-gray-800 font-medium">Clinical integration</p>
+                      <p class="text-gray-600 text-sm">Seamless EHR/EMR integration</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-primary/10 rounded-full blur-xl"></div>
+            </div>
+          </div>
+          <div class="w-full md:w-1/2" data-aos="fade-left">
+            <div class="relative">
+              <div class="ai-chip p-6 rounded-xl border border-white/20 backdrop-blur-sm shadow-lg">
+                <div class="flex items-center mb-4">
+                  <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
+                    <i class="ri-ai-generate text-primary"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-white">AI Diagnosis Report</h4>
+                    <p class="text-xs text-white/80">Generated: Just now</p>
+                  </div>
+                </div>
+                
+                <div class="bg-white/10 p-4 rounded-lg mb-4">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-white">Patient Condition</span>
+                    <span class="text-xs px-2 py-1 bg-primary/20 rounded-full text-white">92% Confidence</span>
+                  </div>
+                  <p class="text-white text-sm">High probability of diabetic retinopathy detected in retinal scan</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                  <div class="bg-white/10 p-3 rounded-lg">
+                    <p class="text-xs text-white/70 mb-1">Recommended Action</p>
+                    <p class="text-sm text-white">Refer to ophthalmologist</p>
+                  </div>
+                  <div class="bg-white/10 p-3 rounded-lg">
+                    <p class="text-xs text-white/70 mb-1">Urgency</p>
+                    <p class="text-sm text-white">Within 2 weeks</p>
+                  </div>
+                </div>
+                
+                <div class="bg-white/10 p-3 rounded-lg">
+                  <p class="text-xs text-white/70 mb-1">Key Findings</p>
+                  <ul class="text-sm text-white space-y-1">
+                    <li class="flex items-start">
+                      <i class="ri-checkbox-circle-fill text-primary mr-2 mt-0.5"></i>
+                      <span>Microaneurysms detected</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="ri-checkbox-circle-fill text-primary mr-2 mt-0.5"></i>
+                      <span>Hard exudates present</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="ri-checkbox-circle-fill text-primary mr-2 mt-0.5"></i>
+                      <span>No signs of hemorrhage</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div class="absolute -top-6 -right-6 w-24 h-24 bg-primary/10 rounded-full blur-xl"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-20 bg-white">
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-16" data-aos="fade-up">
           <h2 class="text-3xl md:text-4xl font-bold text-dark mb-4">
             How It Works
           </h2>
@@ -233,7 +527,7 @@
           </p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div class="bg-white p-8 rounded-lg text-center">
+          <div class="bg-white p-8 rounded-lg text-center shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="100">
             <div
               class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-6"
             >
@@ -247,10 +541,13 @@
             <div
               class="w-16 h-16 flex items-center justify-center mx-auto mt-6"
             >
-              <i class="ri-link-m ri-2x text-primary"></i>
+              <div class="relative">
+                <i class="ri-link-m ri-2x text-primary"></i>
+                <div class="absolute -inset-2 bg-primary/10 rounded-full animate-ping opacity-75"></div>
+              </div>
             </div>
           </div>
-          <div class="bg-white p-8 rounded-lg text-center">
+          <div class="bg-white p-8 rounded-lg text-center shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="200">
             <div
               class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-6"
             >
@@ -264,10 +561,13 @@
             <div
               class="w-16 h-16 flex items-center justify-center mx-auto mt-6"
             >
-              <i class="ri-microscope-line ri-2x text-primary"></i>
+              <div class="relative">
+                <i class="ri-microscope-line ri-2x text-primary"></i>
+                <div class="absolute -inset-2 bg-primary/10 rounded-full animate-ping opacity-75 delay-300"></div>
+              </div>
             </div>
           </div>
-          <div class="bg-white p-8 rounded-lg text-center">
+          <div class="bg-white p-8 rounded-lg text-center shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="300">
             <div
               class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-6"
             >
@@ -280,10 +580,13 @@
             <div
               class="w-16 h-16 flex items-center justify-center mx-auto mt-6"
             >
-              <i class="ri-heart-pulse-line ri-2x text-primary"></i>
+              <div class="relative">
+                <i class="ri-heart-pulse-line ri-2x text-primary"></i>
+                <div class="absolute -inset-2 bg-primary/10 rounded-full animate-ping opacity-75 delay-500"></div>
+              </div>
             </div>
           </div>
-          <div class="bg-white p-8 rounded-lg text-center">
+          <div class="bg-white p-8 rounded-lg text-center shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="400">
             <div
               class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-6"
             >
@@ -296,7 +599,92 @@
             <div
               class="w-16 h-16 flex items-center justify-center mx-auto mt-6"
             >
-              <i class="ri-check-double-line ri-2x text-primary"></i>
+              <div class="relative">
+                <i class="ri-check-double-line ri-2x text-primary"></i>
+                <div class="absolute -inset-2 bg-primary/10 rounded-full animate-ping opacity-75 delay-700"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 bg-gray-50">
+      <div class="container mx-auto px-6">
+        <div class="text-center mb-16" data-aos="fade-up">
+          <h2 class="text-3xl md:text-4xl font-bold text-dark mb-4">
+            Trusted by Healthcare Professionals
+          </h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">
+            Hear what medical experts say about our AI-powered solutions.
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="bg-white p-8 rounded-lg shadow-sm" data-aos="fade-up" data-aos-delay="100">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-4">
+                <i class="ri-user-3-line ri-lg"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold">Dr. Sarah Johnson</h4>
+                <p class="text-sm text-gray-500">Radiologist, Mayo Clinic</p>
+              </div>
+            </div>
+            <div class="text-gray-600 mb-4">
+              "MediAI has reduced our diagnostic time by 40% while improving accuracy. The AI's ability to highlight subtle anomalies in scans is remarkable."
+            </div>
+            <div class="flex">
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
+            </div>
+          </div>
+          
+          <div class="bg-white p-8 rounded-lg shadow-sm" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-4">
+                <i class="ri-user-3-line ri-lg"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold">Dr. Michael Chen</h4>
+                <p class="text-sm text-gray-500">Cardiologist, Johns Hopkins</p>
+              </div>
+            </div>
+            <div class="text-gray-600 mb-4">
+              "The predictive analytics have transformed how we manage high-risk patients. We're catching potential complications days before they manifest."
+            </div>
+            <div class="flex">
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-half-fill text-yellow-400"></i>
+            </div>
+          </div>
+          
+          <div class="bg-white p-8 rounded-lg shadow-sm" data-aos="fade-up" data-aos-delay="300">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-4">
+                <i class="ri-user-3-line ri-lg"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold">Dr. Emily Rodriguez</h4>
+                <p class="text-sm text-gray-500">Oncologist, MD Anderson</p>
+              </div>
+            </div>
+            <div class="text-gray-600 mb-4">
+              "The treatment optimization algorithms have helped us personalize cancer therapies with unprecedented precision. Our response rates have improved significantly."
+            </div>
+            <div class="flex">
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
+              <i class="ri-star-fill text-yellow-400"></i>
             </div>
           </div>
         </div>
@@ -305,27 +693,45 @@
 
     <!-- Call-to-Action Section -->
     <section
-      class="py-20"
+      class="py-20 relative overflow-hidden"
       style="background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%)"
     >
-      <div class="container mx-auto px-6 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-          Ready to Transform Your Healthcare Practice?
-        </h2>
-        <p class="text-white/90 max-w-2xl mx-auto mb-10 text-lg">
-          Join over 500 healthcare providers already using MediAI to improve
-          patient outcomes and streamline their operations.
-        </p>
+      <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-0 left-0 w-32 h-32 rounded-full bg-white/20 blur-3xl"></div>
+        <div class="absolute bottom-0 right-0 w-32 h-32 rounded-full bg-white/20 blur-3xl"></div>
+      </div>
+      
+      <div class="container mx-auto px-6 text-center relative z-10">
+        <div class="max-w-3xl mx-auto" data-aos="zoom-in">
+          <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+            Ready to Transform Your Healthcare Practice?
+          </h2>
+          <p class="text-white/90 mb-10 text-lg">
+            Join over 500 healthcare providers already using MediAI to improve
+            patient outcomes and streamline their operations.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="{% url 'register' %}"
+              class="bg-white text-primary px-8 py-3 !rounded-button hover:bg-gray-100 transition-colors font-semibold whitespace-nowrap inline-flex items-center justify-center shadow-lg hover:shadow-xl"
+            >
+              Get Started
+              <i class="ri-arrow-right-line ml-2"></i>
+            </a>
+          </div>
+        </div>
       </div>
     </section>
+    
     <!-- Footer -->
     <footer class="bg-dark text-white pt-16 pb-8">
       <div class="container mx-auto px-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div>
-            <a href="#" class="text-3xl font-['Pacifico'] text-white mb-6 block"
-              >logo</a
-            >
+            <a href="#" class="text-3xl font-bold text-white mb-6 block flex items-center">
+              <i class="ri-heart-pulse-fill text-primary mr-2"></i>
+              MediAI
+            </a>
             <p class="text-gray-300 mb-6">
               Leading the revolution in AI-powered healthcare solutions since
               2022.
@@ -434,18 +840,7 @@
             <p class="text-gray-300 mb-4">
               Stay updated with our latest news and developments.
             </p>
-            
-            <div class="mt-6">
-              <h4 class="text-sm font-semibold mb-3">
-                Accepted Payment Methods
-              </h4>
-              <div class="flex space-x-3">
-                <i class="ri-visa-fill ri-lg text-gray-300"></i>
-                <i class="ri-mastercard-fill ri-lg text-gray-300"></i>
-                <i class="ri-paypal-fill ri-lg text-gray-300"></i>
-                <i class="ri-apple-fill ri-lg text-gray-300"></i>
-              </div>
-            </div>
+
           </div>
         </div>
         <div class="border-t border-white/10 pt-8">
@@ -474,5 +869,13 @@
         </div>
       </div>
     </footer>
+    
+    <script>
+      AOS.init({
+        duration: 800,
+        easing: 'ease-in-out',
+        once: true
+      });
+    </script>
   </body>
 </html>

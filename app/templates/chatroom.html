@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Room</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-2xl mx-auto mt-10 bg-white rounded shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Chat with {{ consultation.doctor.user.get_full_name }}</h2>
+
+        <!-- Chat Messages -->
+        <div id="chat-box" class="h-80 overflow-y-scroll border rounded p-4 bg-gray-50 mb-4">
+            {% for msg in messages %}
+                <div class="mb-2">
+                    <span class="text-sm font-semibold text-gray-700">
+                        {% if msg.sender_doctor %}
+                            Dr. {{ msg.sender_doctor.user.get_full_name }}:
+                        {% else %}
+                            {{ msg.sender.get_full_name }}:
+                        {% endif %}
+                    </span>
+                    <p class="ml-2 text-gray-800">{{ msg.message }}</p>
+                    <small class="text-xs text-gray-500">{{ msg.timestamp|date:"M d, H:i" }}</small>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Message Form -->
+        <form id="chat-form" method="post" class="flex gap-2">
+            {% csrf_token %}
+            <input type="hidden" name="room_id" value="{{ room.id }}">
+            <input
+                type="text"
+                name="message"
+                id="message"
+                placeholder="Type your message..."
+                class="flex-1 border px-3 py-2 rounded"
+                autocomplete="off"
+                required
+            >
+            <button
+                type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+                Send
+            </button>
+        </form>
+    </div>
+
+    <!-- AJAX Script -->
+    <script>
+        const form = document.getElementById('chat-form');
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('message');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            fetch("{% url 'send_message' room.id %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: new URLSearchParams({
+                    message: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'mb-2';
+                    msgDiv.innerHTML = `
+                        <span class="text-sm font-semibold text-blue-700">You:</span>
+                        <p class="ml-2 text-gray-800">${message}</p>
+                        <small class="text-xs text-gray-500">just now</small>
+                    `;
+                    chatBox.appendChild(msgDiv);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    messageInput.value = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

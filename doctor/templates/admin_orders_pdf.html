@@ -1,0 +1,47 @@
+<!-- templates/orders_pdf.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Order Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #333; padding: 6px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>Order Report</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Items</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.order_number }}</td>
+                <td>{{ order.user.username }}</td>
+                <td>{{ order.user.email }}</td>
+                <td>{{ order.ordered_at|date:"Y-m-d" }}</td>
+                <td>{{ order.status|title }}</td>
+                <td>{{ order.total_price }}</td>
+                <td>
+                    {% for item in order.items.all %}
+                        {{ item.product.name }} x {{ item.quantity }}{% if not forloop.last %}; {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

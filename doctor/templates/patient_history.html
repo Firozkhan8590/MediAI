@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doctor Dashboard | Consultations</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+      .patient-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <div class="flex flex-col min-h-screen">
+      <!-- Header -->
+      <header class="bg-white shadow-sm">
+        <div class="px-6 py-4 flex items-center justify-between">
+          <h1 class="text-xl font-semibold text-gray-800">
+            Patient History
+          </h1>
+          <div class="relative">
+            <input
+              id="patient-search"
+              type="text"
+              placeholder="Search patients..."
+              class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- Consultation Cards -->
+      <main class="flex-1 p-6">
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          id="consultation-list"
+        >
+          {% for consult in consultations %}
+          <div
+            class="bg-white rounded-lg shadow-sm overflow-hidden patient-card transition-all duration-200"
+          >
+            <div class="p-4 border-b border-gray-100 bg-blue-50">
+              <div class="flex items-center space-x-3">
+                <img
+                  class="h-10 w-10 rounded-full"
+                  src="https://ui-avatars.com/api/?name={{ consultation.user.username }}&background=random"
+                  alt=""
+                />
+                <div>
+                  <h3 class="font-semibold text-gray-800">
+                    {{ consult.user.username }}
+                  </h3>
+                  <p class="text-sm text-gray-600">{{ consult.user.email }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-4 space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="font-medium text-gray-700">Date:</span>
+                <span class="text-gray-600"
+                  >{{ consult.appointment_date }}</span
+                >
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="font-medium text-gray-700">Time:</span>
+                <span class="text-gray-600"
+                  >{{ consult.appointment_time }}</span
+                >
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="font-medium text-gray-700">Status:</span>
+                <span
+                  class="text-sm px-2 py-1 bg-gray-100 text-gray-800 rounded-full"
+                  >{{ consult.status|title }}</span
+                >
+              </div>
+            </div>
+            <div class="px-4 py-3 bg-gray-50 text-right">
+              <span class="text-xs text-gray-500"
+                >Booked at: {{ consult.booked_at|date:"M d, Y H:i" }}</span
+              >
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-gray-600 col-span-full text-center">
+            No consultations found.
+          </p>
+          {% endfor %}
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Search filter
+      document
+        .querySelector("#patient-search")
+        .addEventListener("input", function (e) {
+          const term = e.target.value.toLowerCase();
+          document
+            .querySelectorAll("#consultation-list .patient-card")
+            .forEach((card) => {
+              const name = card.querySelector("h3").textContent.toLowerCase();
+              card.style.display = name.includes(term) ? "block" : "none";
+            });
+        }); 
+    </script>
+  </body> 
+</html>

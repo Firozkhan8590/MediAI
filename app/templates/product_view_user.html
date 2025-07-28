@@ -3,322 +3,221 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luxury Skincare Product</title>
+    <title>{{ product.name }} | Luxury Skincare</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#0ea5e9",
-              secondary: "#64748b",
-            },
-            borderRadius: {
-              none: "0px",
-              sm: "4px",
-              DEFAULT: "8px",
-              md: "12px",
-              lg: "16px",
-              xl: "20px",
-              "2xl": "24px",
-              "3xl": "32px",
-              full: "9999px",
-              button: "8px",
-            },
-          },
-        },
-      };
-    </script>
     <style>
-      :where([class^="ri-"])::before {
-        content: "\f3c2";
+      body {
+        font-family: 'Montserrat', sans-serif;
       }
-      .custom-number-input::-webkit-inner-spin-button,
-      .custom-number-input::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
+      .logo {
+        font-family: 'Pacifico', cursive;
       }
-      .custom-scrollbar::-webkit-scrollbar {
+      .product-gallery {
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e0 #f3f4f6;
+      }
+      .product-gallery::-webkit-scrollbar {
         height: 4px;
       }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
+      .product-gallery::-webkit-scrollbar-track {
+        background: #f3f4f6;
       }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #888;
+      .product-gallery::-webkit-scrollbar-thumb {
+        background-color: #cbd5e0;
         border-radius: 4px;
       }
-      .rating-chart {
-        height: 200px;
+      .quantity-selector button {
+        transition: all 0.2s ease;
+      }
+      .quantity-selector button:active {
+        transform: scale(0.95);
+      }
+      .accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+      }
+      .accordion.active .accordion-content {
+        max-height: 500px;
+      }
+      .accordion.active .accordion-arrow {
+        transform: rotate(180deg);
+      }
+      .thumbnail.active {
+        border-color: #0ea5e9;
+        box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);
+      }
+      .btn-primary {
+        transition: all 0.2s ease;
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+      }
+      .btn-primary:active {
+        transform: translateY(0);
       }
     </style>
   </head>
-  <body class="bg-gray-50">
+  <body class="bg-gray-50 text-gray-800">
+    <!-- Header -->
     <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-      <div
-        class="container mx-auto px-4 h-16 flex items-center justify-between"
-      >
+      <div class="container mx-auto px-4 h-16 flex items-center justify-between">
         <div class="flex items-center gap-8">
-          <a
-            href=""
-            onclick="location.reload();"
-            class="text-2xl font-['Pacifico'] text-primary"
-            >Medi AI</a
-          >
+          <a href="#" onclick="location.reload();" class="logo text-2xl text-primary">Medi AI</a>
           <nav>
-            <a
-              href="{% url 'user_landing' %}"
-              class="inline-flex items-center gap-1 text-gray-600 hover:text-primary"
-            >
+            <a href="{% url 'user_landing' %}" class="inline-flex items-center gap-2 text-gray-600 hover:text-primary transition-colors">
               <i class="ri-arrow-left-line"></i>
-              <span>Back</span>
+              <span>Back to Shop</span>
             </a>
           </nav>
         </div>
         <div class="flex items-center gap-4">
-          <button
-            class="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-primary"
-          >
-            <i class="ri-search-line text-xl"></i>
-          </button>
-          <button
-            class="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-primary"
-          >
+          <a href="#" class="p-2 text-gray-600 hover:text-primary relative">
             <i class="ri-shopping-cart-line text-xl"></i>
-          </button>
+            <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+          </a>
+          <a href="#" class="p-2 text-gray-600 hover:text-primary">
+            <i class="ri-user-line text-xl"></i>
+          </a>
         </div>
       </div>
     </header>
-    <main class="container mx-auto px-4 pt-24 pb-16">
-      <div class="grid grid-cols-2 gap-12">
-        <!-- Product Image + Thumbnails -->
-        <div class="sticky top-24">
-          <div class="aspect-square rounded-lg overflow-hidden bg-white">
-            <img
-              id="mainImage"
-              src="https://readdy.ai/api/search-image?query=luxury%20skincare%20serum%20bottle&width=800&height=800"
-              class="w-full h-full object-cover object-top"
-              alt="Product"
-            />
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pt-28 pb-16">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Product Gallery -->
+        <div class="sticky top-28">
+          <!-- Main Image -->
+          <div class="aspect-square rounded-2xl overflow-hidden bg-white shadow-lg">
+            <img id="mainImage" src="{{ product.image.url }}" class="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-105" alt="{{ product.name }}" />
           </div>
-          <div class="mt-4 flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
-            <button
-              class="flex-shrink-0 w-20 h-20 rounded bg-white overflow-hidden border-2 border-primary"
-              onclick="changeImage('https://readdy.ai/api/search-image?query=luxury%20skincare%20serum%20bottle&width=800&height=800')"
-            >
-              <img
-                src="https://readdy.ai/api/search-image?query=luxury%20skincare%20serum%20bottle&width=80&height=80"
-                class="w-full h-full object-cover object-top"
-                alt="Thumbnail 1"
-              />
+          
+          <!-- Thumbnail Gallery -->
+          <div class="mt-6 flex gap-4 overflow-x-auto pb-2 product-gallery">
+            {% for i in "123" %}
+            <button class="thumbnail flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-gray-300 transition-all {% if forloop.first %}active{% endif %}" 
+                    onclick="changeImage('{{ product.image.url }}', this)">
+              <img src="{{ product.image.url }}" class="w-full h-full object-cover object-center" alt="Thumbnail {{ forloop.counter }}" />
             </button>
-            <button
-              class="flex-shrink-0 w-20 h-20 rounded bg-white overflow-hidden border-2 border-transparent hover:border-gray-200"
-              onclick="changeImage('https://readdy.ai/api/search-image?query=serum%20bottle%20on%20glass%20tray&width=800&height=800')"
-            >
-              <img
-                src="https://readdy.ai/api/search-image?query=serum%20bottle%20on%20glass%20tray&width=80&height=80"
-                class="w-full h-full object-cover object-top"
-                alt="Thumbnail 2"
-              />
-            </button>
-            <button
-              class="flex-shrink-0 w-20 h-20 rounded bg-white overflow-hidden border-2 border-transparent hover:border-gray-200"
-              onclick="changeImage('https://readdy.ai/api/search-image?query=clean%20beauty%20serum%20glass%20dropper&width=800&height=800')"
-            >
-              <img
-                src="https://readdy.ai/api/search-image?query=clean%20beauty%20serum%20glass%20dropper&width=80&height=80"
-                class="w-full h-full object-cover object-top"
-                alt="Thumbnail 3"
-              />
-            </button>
+            {% endfor %}
           </div>
         </div>
 
         <!-- Product Details -->
         <div class="space-y-8">
+          <!-- Title & Rating -->
           <div>
-            <h1 class="text-3xl font-bold text-gray-900">{{ product.name }}</h1>
+            <div class="flex justify-between items-start">
+              <h1 class="text-3xl font-bold text-gray-900">{{ product.name }}</h1>
+              <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ product.quantity }} Stock Left</span>
+            </div>
             
             <div class="mt-4 flex items-center gap-4">
-              <div class="flex items-center gap-1 text-yellow-400">
-                <i class="ri-star-fill"></i>
-                <i class="ri-star-fill"></i>
-                <i class="ri-star-fill"></i>
-                <i class="ri-star-fill"></i>
-                <i class="ri-star-half-fill"></i>
-                <span class="ml-2 text-sm text-gray-600">4.8</span>
+              <div class="flex items-center">
+                {% for i in "12345" %}
+                  {% if forloop.counter <= 4 %}
+                    <i class="ri-star-fill text-yellow-400"></i>
+                  {% else %}
+                    <i class="ri-star-half-fill text-yellow-400"></i>
+                  {% endif %}
+                {% endfor %}
+                <span class="ml-2 text-sm font-medium text-gray-600">4.8</span>
               </div>
-              <span class="text-sm text-gray-600">Based on 1,245 reviews</span>
+              <span class="text-sm text-gray-500">1,245 reviews</span>
+              <a href="#reviews" class="text-sm text-primary hover:underline">See all reviews</a>
             </div>
-            <div class="mt-4">
-              <span class="text-3xl font-bold text-gray-900"> ₹{{ product.price }}</span>
-
+            
+            <div class="mt-6">
+              <span class="text-3xl font-bold text-gray-900">₹{{ product.price }}</span>
+              <span class="text-sm text-gray-500 ml-2">+ applicable taxes</span>
             </div>
           </div>
 
-          <!-- Options -->
-          <div class="space-y-4">
-            <!-- Size -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Size Options</label
-              >
-              <div class="grid grid-cols-3 gap-2">
-                <button
-                  class="h-12 rounded-button border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-900"
-                >
-                  30ml
-                </button>
-                <button
-                  class="h-12 rounded-button border border-primary bg-primary bg-opacity-5 text-primary font-medium"
-                >
-                  50ml
-                </button>
-                <button
-                  class="h-12 rounded-button border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-900"
-                >
-                  100ml
-                </button>
-              </div>
-            </div>
-
-            <!-- Skin Type -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Skin Type</label
-              >
-              <div class="grid grid-cols-2 gap-2">
-                <button
-                  class="h-12 rounded-button border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-900"
-                >
-                  Normal to Dry
-                </button>
-                <button
-                  class="h-12 rounded-button border border-primary bg-primary bg-opacity-5 text-primary font-medium"
-                >
-                  Combination to Oily
-                </button>
-                <button
-                  class="h-12 rounded-button border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-900"
-                >
-                  Sensitive
-                </button>
-                <button
-                  class="h-12 rounded-button border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-900"
-                >
-                  All Skin Types
-                </button>
-              </div>
-            </div>
-
-            <!-- Quantity -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Quantity</label
-              >
-              <div
-                class="inline-flex items-center border border-gray-200 rounded-button"
-              >
-                <button
-                  class="w-12 h-12 flex items-center justify-center text-gray-600 hover:text-gray-900 border-r border-gray-200"
-                >
-                  <i class="ri-subtract-line"></i>
-                </button>
-                <input
-                  type="number"
-                  value="1"
-                  class="w-16 h-12 text-center border-none custom-number-input"
-                />
-                <button
-                  class="w-12 h-12 flex items-center justify-center text-gray-600 hover:text-gray-900 border-l border-gray-200"
-                >
-                  <i class="ri-add-line"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Add to Cart + Wishlist -->
-            <div class="flex gap-4">
-              <button
-                class="flex-1 h-12 bg-primary text-white font-medium rounded-button hover:bg-primary/90"
-              >
-                Add to Cart
-              </button>
-              <button
-                class="w-12 h-12 flex items-center justify-center text-gray-600 hover:text-primary border border-gray-200 rounded-button"
-              >
-                <i class="ri-heart-line"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Description & Shipping -->
-          <div class="border-t border-gray-200 pt-8 space-y-6">
-            <div>
-              <button
-                class="flex items-center justify-between w-full text-left"
-              >
-                <span class="text-lg font-medium text-gray-900"
-                  >Product Description</span
-                >
-                <i class="ri-arrow-down-s-line text-xl text-gray-500"></i>
-              </button>
-              <div class="mt-4 text-gray-600 space-y-4">
-                <p>
-                  {{ product.description }}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <button
-                class="flex items-center justify-between w-full text-left"
-              >
-                <span class="text-lg font-medium text-gray-900"
-                  >Shipping & Returns</span
-                >
-                <i class="ri-arrow-down-s-line text-xl text-gray-500"></i>
-              </button>
-              <div class="mt-4 space-y-4">
-                <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
-                  <div
-                    class="w-8 h-8 flex items-center justify-center text-primary"
-                  >
-                    <i class="ri-truck-line text-xl"></i>
-                  </div>
-                  <div>
-                    <h4 class="font-medium text-gray-900">
-                      Free Standard Shipping
-                    </h4>
-                    <p class="mt-1 text-sm text-gray-600">
-                      For orders over $100. Delivery in 3-5 business days.
-                    </p>
-                  </div>
+          <!-- Quantity Selector -->
+          <div class="pt-4 border-t border-gray-200">
+            <div class="flex items-center gap-6">
+              <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-gray-700">Quantity:</label>
+                <div class="quantity-selector inline-flex items-center border border-gray-200 rounded-lg shadow-sm">
+                  <button type="button" onclick="updateQuantity(-1)" class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50">
+                    <i class="ri-subtract-line"></i>
+                  </button>
+                  <input type="number" id="quantityInput" value="1" min="1" class="w-16 h-10 text-center border-x border-gray-200 focus:ring-2 focus:ring-primary focus:outline-none" />
+                  <button type="button" onclick="updateQuantity(1)" class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50">
+                    <i class="ri-add-line"></i>
+                  </button>
                 </div>
-                <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
-                  <div
-                    class="w-8 h-8 flex items-center justify-center text-primary"
-                  >
-                    <i class="ri-refresh-line text-xl"></i>
+              </div>
+              <div class="text-sm">
+                <span class="text-gray-600">Total: </span>
+                <span id="totalPrice" class="font-medium">₹{{ product.price }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-4 pt-6">
+            <form action="{% url 'cart_add' product.id %}" method="POST" id="addToCartForm" class="flex-1">
+              {% csrf_token %}
+              <input type="hidden" name="quantity" id="formQuantity" value="1" />
+              <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium shadow-md">
+                <i class="ri-shopping-cart-line mr-2"></i> Add to Cart
+              </button>
+            </form>
+          </div>
+
+          <!-- Product Details Accordions -->
+          <div class="space-y-4 pt-6">
+            <!-- Description Accordion -->
+            <div class="accordion border border-gray-200 rounded-lg overflow-hidden">
+              <button class="flex items-center justify-between w-full text-left p-4 hover:bg-gray-50 transition-colors" onclick="toggleAccordion(this)">
+                <span class="font-medium text-gray-900">
+                  <i class="ri-information-line text-primary mr-2"></i>
+                  Product Description
+                </span>
+                <i class="ri-arrow-down-s-line text-xl text-gray-500 transition-transform accordion-arrow"></i>
+              </button>
+              <div class="accordion-content">
+                <div class="px-4 pb-4 text-gray-600">
+                  <p>{{ product.description }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shipping Accordion -->
+            <div class="accordion border border-gray-200 rounded-lg overflow-hidden">
+              <button class="flex items-center justify-between w-full text-left p-4 hover:bg-gray-50 transition-colors" onclick="toggleAccordion(this)">
+                <span class="font-medium text-gray-900">
+                  <i class="ri-truck-line text-primary mr-2"></i>
+                  Shipping & Returns
+                </span>
+                <i class="ri-arrow-down-s-line text-xl text-gray-500 transition-transform accordion-arrow"></i>
+              </button>
+              <div class="accordion-content">
+                <div class="space-y-4 px-4 pb-4">
+                  <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="w-10 h-10 flex items-center justify-center text-primary bg-blue-50 rounded-full">
+                      <i class="ri-truck-line"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-gray-900">Free Standard Shipping</h4>
+                      <p class="mt-1 text-sm text-gray-600">For orders over ₹1000. Delivery in 3-5 business days.</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 class="font-medium text-gray-900">60-Day Returns</h4>
-                    <p class="mt-1 text-sm text-gray-600">
-                      Not the right fit? Return within 60 days for a full
-                      refund.
-                    </p>
+                  <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="w-10 h-10 flex items-center justify-center text-primary bg-blue-50 rounded-full">
+                      <i class="ri-refresh-line"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-gray-900">60-Day Returns</h4>
+                      <p class="mt-1 text-sm text-gray-600">Not satisfied? Return within 60 days for a full refund.</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -329,42 +228,51 @@
     </main>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const chart = echarts.init(document.getElementById("ratingChart"));
-        const option = {
-          animation: false,
-          grid: {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 60,
-          },
-          xAxis: {
-            type: "value",
-            show: false,
-          },
-          yAxis: {
-            type: "category",
-            data: ["5 stars", "4 stars", "3 stars", "2 stars", "1 star"],
-            axisLine: { show: false },
-            axisTick: { show: false },
-            axisLabel: {
-              color: "#666",
-            },
-          },
-          series: [
-            {
-              type: "bar",
-              data: [1680, 492, 164, 82, 40],
-              barWidth: "60%",
-              itemStyle: {
-                color: "rgba(87, 181, 231, 1)",
-              },
-            },
-          ],
-        };
-        chart.setOption(option);
+      // Image gallery functionality
+      function changeImage(src, element) {
+        document.getElementById("mainImage").src = src;
+        // Update active thumbnail
+        document.querySelectorAll('.thumbnail').forEach(thumb => {
+          thumb.classList.remove('active', 'border-primary');
+          thumb.classList.add('border-gray-200');
+        });
+        element.classList.add('active', 'border-primary');
+        element.classList.remove('border-gray-200');
+      }
+
+      // Accordion functionality
+      function toggleAccordion(button) {
+        const accordion = button.closest('.accordion');
+        accordion.classList.toggle('active');
+      }
+
+      // Quantity and price calculation
+      const pricePerUnit = {{ product.price }};
+      const quantityInput = document.getElementById("quantityInput");
+      const formQuantity = document.getElementById("formQuantity");
+      const totalPriceSpan = document.getElementById("totalPrice");
+
+      function updateQuantity(change) {
+        let newValue = parseInt(quantityInput.value) + change;
+        if (newValue < 1) newValue = 1;
+        quantityInput.value = newValue;
+        updatePrice();
+      }
+
+      function updatePrice() {
+        const qty = parseInt(quantityInput.value) || 1;
+        totalPriceSpan.textContent = (pricePerUnit * qty).toFixed(2);
+        formQuantity.value = qty;
+      }
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', function() {
+        updatePrice();
+        quantityInput.addEventListener('input', updatePrice);
       });
     </script>
   </body>
 </html>
+
+
+

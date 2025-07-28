@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skincare Recommendations | Find Your Perfect Match</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header Section -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+                <a href="{% url 'user_landing' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 transition-colors mb-4 sm:mb-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Back to Home
+                </a>
+                <h1 class="text-3xl font-bold text-gray-800">Find Your Perfect Skincare</h1>
+                <p class="text-gray-600 mt-2">Discover products tailored to your skin type</p>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <form method="get" class="flex flex-col sm:flex-row gap-4" action="{% url 'recommend_products' %}">
+                <select name="skin_type" class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Select Your Skin Type</option>
+                    <option value="oily skin" {% if skin_type == "oily skin" %}selected{% endif %}>Oily Skin</option>
+                    <option value="dry skin" {% if skin_type == "dry skin" %}selected{% endif %}>Dry Skin</option>
+                    <option value="sensitive skin" {% if skin_type == "sensitive skin" %}selected{% endif %}>Sensitive Skin</option>
+                </select>
+                <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                    Find Products
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        {% if skin_type %}
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800">Recommended for <span class="text-indigo-600 capitalize">{{ skin_type }}</span></h2>
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ recommendations|length }} products found</span>
+            </div>
+
+            {% if recommendations %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {% for p in recommendations %}
+                        <div class="product-card bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300">
+                            <div class="h-48 w-full overflow-hidden">
+                                <img src="{{ p.image_url }}" alt="{{ p.product_name }}" onerror="this.src='/static/images/placeholder.jpg'" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ p.product_name }}</h3>
+                                <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ p.description }}</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-indigo-600 font-bold">{{ p.price }}</span>
+                                    <button class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">No products found</h3>
+                    <p class="text-gray-600">We couldn't find any products matching your skin type. Please try a different selection.</p>
+                </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+            <div class="max-w-md mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-indigo-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <h3 class="text-xl font-medium text-gray-800 mb-3">Find Your Skincare Match</h3>
+                <p class="text-gray-600 mb-6">Select your skin type from the dropdown above to discover personalized product recommendations that will work best for you.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

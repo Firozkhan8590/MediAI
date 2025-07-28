@@ -15,7 +15,20 @@ urlpatterns = [
     path('user_landing/',views.user_landing,name='user_landing'),
     path('product_view/<int:product_id>/',views.product_view,name='product_view'),
     path('product_search/', views.product_search, name='product_search'),
-    
+    path('profile/<int:user_id>/edit/', views.edit_profile_user, name='edit_profile_user'),
+
+
+    #appointment
+    path('appointment/', views.appointment_list, name='appointment_list'),
+    path('appointments/cancel/<int:pk>/', views.cancel_appointment, name='cancel_appointment'),
+
+
+    path('recommend_products/', views.recommend_products, name='recommend_products'),
+    # path('product/<int:pk>/', views.product_detail_csv, name='product_detail_csv'),
+
+
+
+ 
 
     #forget password
     path('forgot-password/', views.forget_password, name='forgot-password'),
@@ -47,8 +60,14 @@ urlpatterns = [
 
 
     #Chatbot
-    path('chat/', views.chat_page, name='chat_page'),
+    path('chat/', views.chat_page, name='chat_page_user'),
     path('chat-api/', views.chat_api, name='chat_api'),
+
+
+    #chatmessages
+    path('notifications/', views.notification_list, name='notification_list'),
+    path('chat/<int:consultation_id>/', views.chat_room, name='chat_room'),
+    path('chat/send/<int:room_id>/', views.send_message, name='send_message'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

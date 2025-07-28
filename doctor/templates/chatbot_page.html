@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Doctor Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for Webkit browsers (Tailwind doesn't cover this) */
+        #chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-box::-webkit-scrollbar-track {
+            background: #4A5568; /* Tailwind gray-700 */
+            border-radius: 10px;
+        }
+
+        #chat-box::-webkit-scrollbar-thumb {
+            background: #4F46E5; /* A shade of indigo/blue for scroll thumb */
+            border-radius: 10px;
+        }
+
+        #chat-box::-webkit-scrollbar-thumb:hover {
+            background: #3730A3; /* Darker indigo/blue on hover */
+        }
+
+        /* Keyframes for loading indicator pulse (Tailwind doesn't offer direct equivalent) */
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        .loading-indicator-animation {
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="font-roboto bg-gray-900 flex justify-center items-center min-h-screen text-gray-100 p-4">
+
+    <div class="chat-container bg-gray-800 rounded-xl shadow-2xl flex flex-col w-full max-w-lg h-[85vh] min-h-[400px] overflow-hidden">
+
+        <div class="chat-header bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4 text-center text-2xl font-bold rounded-t-xl shadow-md">
+            Gemini Doctor Assistant
+        </div>
+
+        <div id="chat-box" class="flex-1 p-5 overflow-y-auto flex flex-col gap-3 bg-gray-700">
+            </div>
+
+        <div class="chat-input-area flex p-4 border-t border-gray-600 bg-gray-800 rounded-b-xl">
+            <input type="text" id="user-input" placeholder="Type your message..." autofocus
+                   class="flex-1 p-3 border border-gray-600 rounded-full text-gray-200 bg-gray-700
+                          focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-200 ease-in-out">
+            <button id="send-button" onclick="sendMessage()"
+                    class="ml-3 px-5 py-3 bg-blue-600 text-white rounded-full font-semibold
+                           hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75
+                           active:scale-95 transition-all duration-200 ease-in-out
+                           disabled:bg-gray-500 disabled:cursor-not-allowed">
+                Send
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Function to get CSRF token (important for Django forms)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const chatBox = document.getElementById("chat-box");
+        const userInput = document.getElementById("user-input");
+        const sendButton = document.getElementById("send-button");
+
+        // Allow sending message with Enter key
+        userInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Disable input and button while processing
+            userInput.disabled = true;
+            sendButton.disabled = true;
+
+            // Add user message to chat box
+            chatBox.innerHTML += `
+                <div class="flex justify-end mb-2">
+                    <div class="max-w-[75%] px-4 py-3 rounded-2xl bg-blue-500 text-white shadow-md rounded-br-md">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            userInput.value = ""; // Clear input immediately
+            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
+
+            // Add a loading indicator for the bot's response
+            const loadingMessageDiv = document.createElement('div');
+            loadingMessageDiv.className = 'flex justify-start mb-2'; // Tailwind classes for bot message wrapper
+            loadingMessageDiv.innerHTML = `
+                <div class="max-w-[75%] px-4 py-3 rounded-2xl bg-gray-600 text-gray-200 shadow-md rounded-bl-md loading-indicator-animation">
+                    Typing...
+                </div>
+            `;
+            chatBox.appendChild(loadingMessageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom to show loading
+
+            try {
+                const response = await fetch("/doctor/chat/", { // Ensure this URL is correct
+                    method: "POST",   
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                // Remove loading indicator
+                chatBox.removeChild(loadingMessageDiv);
+
+                const data = await response.json();
+                if (response.ok) {
+                    chatBox.innerHTML += `
+                        <div class="flex justify-start mb-2">
+                            <div class="max-w-[75%] px-4 py-3 rounded-2xl bg-gray-600 text-gray-200 shadow-md rounded-bl-md">
+                                ${data.reply}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Display specific error from backend if available, otherwise generic
+                    const errorMessage = data.error || "An unknown error occurred.";
+                    chatBox.innerHTML += `
+                        <div class="flex justify-start mb-2">
+                            <div class="max-w-[75%] px-4 py-3 rounded-2xl bg-red-600 text-white shadow-md rounded-bl-md">
+                                <b>Error:</b> ${errorMessage}
+                            </div>
+                        </div>
+                    `;
+                    console.error("Bot Error:", data); // Log full error to console
+                }
+            } catch (error) {
+                // Remove loading indicator even on network error
+                if (chatBox.contains(loadingMessageDiv)) {
+                    chatBox.removeChild(loadingMessageDiv);
+                }
+                chatBox.innerHTML += `
+                    <div class="flex justify-start mb-2">
+                        <div class="max-w-[75%] px-4 py-3 rounded-2xl bg-red-600 text-white shadow-md rounded-bl-md">
+                            <b>Network Error:</b> ${error.message}. Please check your connection.
+                        </div>
+                    </div>
+                `;
+                console.error("Network Error:", error);
+            } finally {
+                // Re-enable input and button
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus(); // Focus input for next message
+                chatBox.scrollTop = chatBox.scrollHeight; // Ensure scroll to bottom
+            }
+        }
+
+        // Initial welcome message (optional)
+        document.addEventListener('DOMContentLoaded', () => {
+            chatBox.innerHTML = `
+                <div class="flex justify-start mb-2">
+                    <div class="max-w-[75%] px-4 py-3 rounded-2xl bg-gray-600 text-gray-200 shadow-md rounded-bl-md">
+                        Hello! I'm your Gemini Doctor Assistant. How can I help you today?
+                    </div>
+                </div>
+            `;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+    </script>
+</body>
+</html>
